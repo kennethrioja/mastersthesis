@@ -1,0 +1,75 @@
+---
+title: "Mémoire MALTT, 2023-2024"
+subtitle: "`r params$doc_subtitle`"
+author: "Kenneth Rioja"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    reference_docx: assets/utils/doc_style.docx
+bibliography: "`r rbbt::bbt_write_bib('assets/utils/bibliography.bib', overwrite = TRUE)`" 
+csl: assets/utils/citation_style.csl
+
+params:
+  doc_subtitle: ""
+
+---
+
+```{r setup, include=FALSE}
+## clear workspace
+rm(list=ls())
+
+## Seed for random number generation
+set.seed(42)
+
+## Load packages
+# install.packages("pacman")
+library(pacman)
+# pacman::p_load(
+#   # insert packages' name here
+# )
+
+## Set working directory to current folder
+# setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # this needs to be commented for 'render_script_mac.command' to work
+
+## Load environment or read .csv files
+# load("mydata.RData")
+# df <- read.csv("assets/data/mydata.csv")
+
+```
+
+# Introduction
+
+## Complexity
+
+@ladyman_etal_2013
+
+```{r introduction}
+```
+
+# Methods
+
+```{r methods}
+```
+
+# Results
+
+```{r results}
+```
+
+# Conclusion
+
+```{r conclusion}
+```
+
+# Discussion
+
+```{r discussion}
+```
+
+# References
+
+<div id="refs"></div>
+
+# Appendix
+
+This will be Appendix A.
