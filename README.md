@@ -1,4 +1,8 @@
-# Masters' thesis
+# 🎓 Masters' thesis
+
+# ⏳ Prerequisites
+
+If rendering does not work, please refer to [this](https://github.com/kennethrioja/rmdzoteroword_workflow).
 
 # 🖋 License
 
