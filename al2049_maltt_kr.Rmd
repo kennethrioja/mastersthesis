@@ -5,7 +5,7 @@ author: "Kenneth Rioja"
 date: "`r Sys.Date()`"
 output:
   word_document:
-    reference_docx: assets/utils/doc_style_apa.docx
+    reference_docx: assets/utils/doc_style_tmb.docx
 bibliography: "`r rbbt::bbt_write_bib('assets/utils/bibliography.bib', overwrite = TRUE)`" 
 csl: assets/utils/citation_style_apa7th.csl
 
@@ -42,14 +42,18 @@ library(pacman)
 <!-- ************ -->
 # Introduction
 
+<!-- Establish a territory : claim centrality, make topic generalizations, review items of previous research -->
+In the past decade much research has been focused on ...
+
 ## Play
 
 ## Epistemic games
-Compared to cognitive-dvping games (Bavelier), other games such as…
-Zimmerman, sanchez
 
-## Learning in epistemic games
-Exploration …
+We often refer to as serious video games (SVG), games designed to offer a pedagogical use. However, we will use the term epistemic video game (EVG) which is more precise than an SVG in a sense that it takes into account the situation and the subjectivity of the game creates and the interactions it allow (@sanchez_2022).
+
+Compared to cognitive-dvping games (Bavelier), other games such as…
+
+Zimmerman, 
 
 ## Player experience
 
@@ -57,8 +61,63 @@ Exploration …
 Jonassen (2000) :
 Non optimal solutions
 
-## Learning analytics
+## Learning in epistemic games
+Exploration …
+
+## Learning / Play analytics
 Epistemic network (https://www.epistemicnetwork.org/)
+
+<!-- Establishing a niche : counter-claiming; indicating a gap, question raison, continuing a tradition -->
+It remains unclear why ...
+
+How ill-structured problems can be visualised
+
+How traces can be analysed ?
+
+However not many have focused on disentangling complexity in an epistemic game.
+
+## Current work
+
+<!-- Occupying the niche : outlining purposes, announcing the present research, announcing principal findings, indicating structure -->
+The purpose of this Masters' thesis was to create a method or building an indices allowing to approach such ill-structured problem.
+
+To follow-up @oliveira_etal_2022 work, "Traces will be collected to see how it is used by the players and how their food conceptions evolve" we will...
+
+Grasping food system complexity
+
+## A priori hypotheses
+
+L’analyse devrait montrer différentes manières de jouer par rapport à : 
+la recherche d’un optimum entre plaisir, santé et bien-être : la recherche d’un juste équilibre, (2) privilégier une des trois dimensions (3) sacrifier une des trois dimensions 
+-> Nous faisons l’hypothèse que les joueurs dans la partie 1 se focalisent sur la santé, puis dans la partie 2, ils veulent rester au centre des trois (équilibre entre santé, bien-être et plaisir) et, qu’ils prennent ensuite une direction particulière en se rendant compte qu’ils n’arrivent pas à trouver l’équilibre parfait.  (changement de stratégie de jeu). 
+voir si un effet après les fake news ? interactions avec les fake news ? 
+
+l’exploration des différentes sources d'énergie (humaine, renouvelable et fossile) : (1) privilégier l’une des trois sources d’énergie, (2) privilégier 2 des 3 sources d’énergie (3) utiliser les trois les sources d’énergie de manière équilibrée 
+-> nous faisons l’hypothèse que ….à compléter. attention le problème de l’énergie fossil avec le fait que’ils pensent que c’est de l’eau ! 
+
+Nous pensons a priori que les joueurs peuvent changer des stratégies au fur et à mesure du jeu, notamment entre la partie 1 et la partie 2.
+
+## A posteriori hypotheses
+
+A la suite des analyses, nous devrions être en mesure de formuler de nouvelles hypothèses sur les représentations des joueurs concernant la complexité ? ( à discuter !)
+
+## Research Questions
+
+Our main research question is “Does the game allow players to grasp food system complexity?”
+To be able to answer the main question, we need to ask ourselves :
+
+### General
+<!-- (choisir la bonne formulation entre les propositions ci-dessous) -->
+Comment les joueurs essaient-ils de remplir la mission du jeu ? Comment les joueurs jouent-ils au jeu ? Comment les joueurs tiennent compte de la complexité ? Comment les joueurs jouent-ils avec la complexité ? Quelles stratégies les joueurs mettent-ils en place pour explorer la complexité dans le jeu AL2049 ?
+
+### Specific 1
+
+Quelle est l’évolution diachronique des scores de plaisir, santé et bien-être ? Quelle est l’évolution dans le temps du ratio entre les scores de santé, bien-être, plaisir ? Quels sont les optimums atteints par les différents groupes pour le ratio entre bien-être, plaisir et santé ? ( Qu’est-ce qui est fait avant et après ? Quelles sont les différentes statégies observables dans la gestion de ces scores ?) 
+
+### Specific 2
+
+Comment les joueurs utilisent-ils les différents types d’énergie dans la première partie du jeu ? dans la deuxième partie du jeu ? tout au long du jeu ? Dans quelle mesure il y’a t’il des changements de stratégies dans l’utilisation des énergies ? 
+
 
 <!-- ******* -->
 <!-- METHODS -->
@@ -69,52 +128,147 @@ Epistemic network (https://www.epistemicnetwork.org/)
 ## AL2049
 
 ### Description
-(Says how it has been designed? Co-designed with research lab, teachers, game developers (paper ref))
 
-AL2049 is an open-ended city-building game, also known as construction and management simulation game, it can be apparented to commercially-available video games such as SimCity, ThemePark or Cities:Skylines. AL2049 is currently playable at the Alimentarium, a food museum based in Vevey (Switzerland, more info : https://www.alimentarium.org/fr/activities/al2049-lescape-game-de-lalimentarium).
+AL2049 is an open-ended city-building game, it can also be called a construction and resource management simulation game. It can be mirrored with commercially-available video games such as SimCity, ThemePark or Cities:Skylines. AL2049 is currently playable at the Alimentarium, a food museum based in Vevey (Switzerland, more info : https://www.alimentarium.org/fr/activities/al2049-lescape-game-de-lalimentarium). This game has been created using design-based research (@oliveira_etal_2022).
 
 The game is played on tablets, by groups of three to four people. Participants’ age ranges from r min(dfage). The game first appears to the players with a map of the museum. Players must physically walk to the different places of the museum to take a picture of the place and unlock a building slot (see. Fig.X). Once the building slot freed, players must choose between Petrol, Solar or Human Ressources to build a facility. Facilities ranges from … .
 
 The game is supervised by a Game Master (‘GM’, usually a museum worker who has knowledge on the game). At the beginning the game, the latter sets the main goal as : feeding everyone. Participants are free to move around the museum for X minutes. Once they come back, the GM enable a new game feature …
 
-### Goals
+AL2049 aims at developing players skill to think about food system complexity.
 
-One of the goals is rooting from the traces, make play strategies bloom, action patterns, or player profile. However, one of the questions to keep in mind is where does the end of the game sits? (e.g., optimum or testing?). We will try to look at the repeating event patterns.
+The data used for this Masters' thesis were collected by ...
+
+### Pedagogical goals
+
+What does "learning about complexity" means ? What are the processes and results from this kind of knowledge ? What is the player capable of doing when she learned how to solve ill-structured problems ?
+
+One of this masters' thesis goal is rooting from the traces, make play strategies bloom, action patterns, or player profile. However, one of the questions to keep in mind is where does the end of the game sits? (e.g., optimum or testing?). We will try to look at the repeating event patterns.
 Analyses of the traces should reflect the designers’ goals (volontés)
 
-## Research questions
-Grasping food production complexity
-Our main research question is “Does the game allow players to grasp food production complexity?”
-To be able to answer the main question, we need to ask ourselves :
+Objectif pédago : On ne veut pas créer une situation complexe, mais sensbilité les jeunes à ce que la complexité existe, pour réaliser qu’elle existe on doit démorceler celleci pour rendre visible ce qui la caractérise. 
 
 <!-- ******* -->
 <!-- RESULTS -->
 <!-- ******* -->
 
+<!-- Avoir 1-4 critères qui sont des indicateurs d’affrontement du système complexe et à partir de ça avoir développement des compétences -->
+<!--   - Indicateurs au niveau du jeu -->
+<!--   - Indicateurs au niveau du joueur (c'est quoi que d'apprendre à se dépatouiller avec les syst complexe) -->
+
+# Criteria of food system complexity transcribed by AL2049
+<!-- Faire ça de manière systématique, 4 pages d'analyse du jeu en fonction des critères trouvés sur complexité.  -->
+
+How AL2049 game designers thought to transcribe complexity in the game, this will lead to objective indicators that can be found in the game's traces. 
+
+# Observable indicators
+<!-- Comment ça se voit dans les traces, quels indicateurs (observables, calculs, représentations).  -->
+
+vision linéaire vont prendre en compte que d’un sens (ex. que Santé, que bienêtre, que population…), ALORS que l’objectif pédago est que les élèves doivent être capables de prendre en compte multiple variables (Task switching) … LIEN AVEC EF (Diamond, 2013): WM/INHIB/SWITCHING
+
+<Insert table from Simon to resume Complexity criteria and Indicators>
+
+|     Critère complexité                   |     Situation réelle (complexité de la production alimentaire)    |     Situation métaphorisée (game, mécaniques de jeu)                  |     Interaction joueur-jeu (play, traces)    |   |
+|------------------------------------------|-------------------------------------------------------------------|-----------------------------------------------------------------------|----------------------------------------------|---|
+|     1. Non-linéaire                      |                                                                   |     Y = Ax + by + cz      Ex. conséquences multiples de -1 pétrole    |                                              |   |
+|     2. Feedback                          |                                                                   |     -1 pétrole DONNE…                                                 |                                              |   |
+|     3. Ordre spontané                    |                                                                   |     Bof…                                                              |                                              |   |
+|     4. Robustesse                        |                                                                   |     Bof…                                                              |                                              |   |
+|     5. Emergence                         |                                                                   |     Debrifing ?                                                       |                                              |   |
+|     6. Organisation hiérarchique         |                                                                   |     Well-being, santé, pop                                            |                                              |   |
+|     7. Numérosité                        |                                                                   |     Nombre de noeuds                                                  |                                              |   |
+|     8. Systémicité (~interdépendance)    |                                                                   |     Deuxième partie du jeu                                            |                                              |   |
+|     9. Incertutude et impérvisibilité    |                                                                   |                                                                       |     Vision opaque de relations cachées       |   | %>% 
+
+# Expected skill
+
+sept savoirs @morin_1999
+
+# Indicators
+
+les valeurs associées à la variable santé en fonction du timestamp
+les valeurs associées à la variable plaisir en fonction du timestamp
+les valeurs associées à la variable bien-être en fonction du timestamp
+l’équilibre optimale mesurée entre les 3 éléments 
+variable temps (timestamp) 
+les valeurs assocités à la variables énergie fossile en fonction du timestamp
+les valeurs assocités à la variables énergie humain en fonction du timestamp
+les valeurs assocités à la variables énergie verte en fonction du timestamp
+/ variable temps (timestamp)
+nbr de fois énergie fossile/verte/humaine ajoutée durant la P1
+nbr de fois énergie fossile/verte/humaine enlevée durant la P1
+niveaux des énergies fossile/verte/humaine à la fin de la P1
+nbr de fois énergie fossile/verte/humaine ajoutée durant la P2
+nbr de fois énergie fossile/verte/humaine enlevée durant la P2
+niveaux des énergies fossile/verte/humaine à la fin de la P2
+
+Nbr de fois où les joueurs consultent le summary
+nombre de changement de direction
+(nombre d’éléments explorés dans la P1) 
+(ordre d’exploration des éléments dans la P1)
+
 # Results
 
 ## Descriptive
+
 How many times do they come back to 0 ?
 
 ## Clustering
 
-## 3D graph (X(health)Y(wellbeing)Z(netfood) on TIME)
-Keeping the focus on one variable may result to not grasping food production complexity.
+## 3D graph (X(health)Y(wellbeing)Z(netfood) on TIME) OR Triangle on time
+
+How does the outcomes of health, wellbeing, netfood are evolving through time ? 
+
+Catégorisation : 
+•	1) affronteurs de complexité et modifient chaque variables en même temps (se conforment et acceptent avec les répercussion, non optimal result)
+•	2) simplifieurs / raisonnement analytique et juste go dans une direction (changent les consignes) 
+•	3) essai-erreur sans but
+•	indicateur => VERS QUOI TENDENT LES ELEVES ?
+•	analyse : analyse factorielle par le biais de la combinaison de plusieurs facteurs.
+
+Quantifier combien d'élèves, on a donné un jeu complexe et il y a tant d'élèves qui entrent dans la complexité.
+
+Keeping the focus on one variable may result to not grasping food system complexity.
+
+## Post-feedback action
+
+L’action après un feedback n’allant pas dans le sens du résultat escompté ? (indicateur)
+
+« Qu'est-ce qui se passe quand ont fait une erreur, quand un résultat à l'encontre, des joueurs qui quelques uns rviennent en arrière, anuler et revenir et essayer une solution. Typique d'un joueur qui tacle complexité. » 
+
 
 ## Visual Network Analysis
 Nodes are representing each game parameter (e.g., ) and vertices are representing the weight. The way the network expands is thought to be an indicator of the player skill to grasp the system complexity.
 
-<!-- ********** -->
-<!-- CONCLUSION -->
-<!-- ********** -->
+## Game state Network as a function of time
 
-# Conclusion
+Idées préconcues, on va pas mettre pétrole et épuisent gens et s'apperçoivent qu'impasse et produisent pas assez. Dans ces cas là, voir bulle pétrole qui s'allume et mobilisé. 
+
+Prendre en compte le temps, cartographier ces bulles de manière thématique, ex. question de l'énergie, de splantes, des animaux.
+
+Evoquait la question du réseau : noeuds éléments agis, complexifie au cours du temps, de plus en plus de bulles (b=param) à la fin réseau très différents et se cantonnent. Représenter le niveau de complexité. Mettre insecte pétrole (noeud) et lien (pondération influence, quand je met insecte) noeud = nb personne nouri et joue dessus. 
+
+2 types : une à priori sur les règles de jeu. Fichier excel : dépendances, modèle initial, simulateur. Pour faire ce réseau, à priori le faire avec les éléments tels qu'ils existent dans le jeu : réseau du game ET réseau du play ce qu'il font. Un modèle attendu du jeu (excel) et jusqu'où partent dans le jeu (play) : quels pourcentage d'éléments, visualisation signifiante, si joueur très expérimenté. Même nicolas de jouer en tant que trace experte. Solution non-correcte mais le niveau de complexité, le maximum car connait tous les éléments et mesurer une distance.
+
+## Predicted model vs. Expert model vs. Player model
+
+Modèle prédit : https://docs.google.com/spreadsheets/d/1njM6T-eD5umXyN-mU__Hetqg3rfiY6GW/edit#gid=557273296
+
+Présenter comme un réseau activable, modèle informatique qui permet de rentrer les données des joueurs. Problème de représenter complexité chez els animaux.
+
+Pourcentage équivaudrait à distance entre attendu et effectif
 
 <!-- ********** -->
 <!-- DISCUSSION -->
 <!-- ********** -->
 
 # Discussion
+
+<!-- Introduction : review findings, discuss outcomes, stake a claim -->
+The findings of this Masters' thesis clearly show that ...
+
+<!-- Evaluation: analyze, offer explanations, reference the literature, state implications -->
+One explanation for ...
 
 ## Complexity
 Ladyman et al. (2013)
@@ -123,15 +277,29 @@ Maybe link with Diamond, 2013
 ## Analysis of the game in terms of complexity
 One of AL2049 aim is to know how players explore “complexity” in the game. By complexity,
 
-## Food production complexity in the game
+## food system complexity in the game
 
 ## Limits
+
+<!-- Conclusion : limitations, recommandations -->
+This study was limited by ...
+
 Jeu play 2
 On reste sur l’interaction joueur·euse – apprenant·e
 
+<!-- ********** -->
+<!-- CONCLUSION -->
+<!-- ********** -->
+
+# Conclusion
+
+We have looked at the food system complexity (real life situation) through an epistemic video game AL2049 (metaphric situation, "game") through its mechanics and the way it is played ("play", learner-play1 interaction, (@sanchez_2022) by one player.
+
+# Acknowledgements
+
 # References
 
-<div id="ref"></div>
+<div id="refs"></div>
 
 # Appendix
 
