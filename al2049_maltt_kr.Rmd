@@ -5,9 +5,9 @@ author: "Kenneth Rioja"
 date: "`r Sys.Date()`"
 output:
   word_document:
-    reference_docx: assets/utils/doc_style.docx
+    reference_docx: assets/utils/doc_style_apa.docx
 bibliography: "`r rbbt::bbt_write_bib('assets/utils/bibliography.bib', overwrite = TRUE)`" 
-csl: assets/utils/citation_style.csl
+csl: assets/utils/citation_style_apa7th.csl
 
 params:
   doc_subtitle: ""
@@ -37,38 +37,101 @@ library(pacman)
 
 ```
 
+<!-- ************ -->
+<!-- INTRODUCTION -->
+<!-- ************ -->
 # Introduction
 
-## Complexity
+## Play
 
-@ladyman_etal_2013
+## Epistemic games
+Compared to cognitive-dvping games (Bavelier), other games such as…
+Zimmerman, sanchez
 
-```{r introduction}
-```
+## Learning in epistemic games
+Exploration …
+
+## Player experience
+
+## Ill-structured problem
+Jonassen (2000) :
+Non optimal solutions
+
+## Learning analytics
+Epistemic network (https://www.epistemicnetwork.org/)
+
+<!-- ******* -->
+<!-- METHODS -->
+<!-- ******* -->
 
 # Methods
 
-```{r methods}
-```
+## AL2049
+
+### Description
+(Says how it has been designed? Co-designed with research lab, teachers, game developers (paper ref))
+
+AL2049 is an open-ended city-building game, also known as construction and management simulation game, it can be apparented to commercially-available video games such as SimCity, ThemePark or Cities:Skylines. AL2049 is currently playable at the Alimentarium, a food museum based in Vevey (Switzerland, more info : https://www.alimentarium.org/fr/activities/al2049-lescape-game-de-lalimentarium).
+
+The game is played on tablets, by groups of three to four people. Participants’ age ranges from r min(dfage). The game first appears to the players with a map of the museum. Players must physically walk to the different places of the museum to take a picture of the place and unlock a building slot (see. Fig.X). Once the building slot freed, players must choose between Petrol, Solar or Human Ressources to build a facility. Facilities ranges from … .
+
+The game is supervised by a Game Master (‘GM’, usually a museum worker who has knowledge on the game). At the beginning the game, the latter sets the main goal as : feeding everyone. Participants are free to move around the museum for X minutes. Once they come back, the GM enable a new game feature …
+
+### Goals
+
+One of the goals is rooting from the traces, make play strategies bloom, action patterns, or player profile. However, one of the questions to keep in mind is where does the end of the game sits? (e.g., optimum or testing?). We will try to look at the repeating event patterns.
+Analyses of the traces should reflect the designers’ goals (volontés)
+
+## Research questions
+Grasping food production complexity
+Our main research question is “Does the game allow players to grasp food production complexity?”
+To be able to answer the main question, we need to ask ourselves :
+
+<!-- ******* -->
+<!-- RESULTS -->
+<!-- ******* -->
 
 # Results
 
-```{r results}
-```
+## Descriptive
+How many times do they come back to 0 ?
+
+## Clustering
+
+## 3D graph (X(health)Y(wellbeing)Z(netfood) on TIME)
+Keeping the focus on one variable may result to not grasping food production complexity.
+
+## Visual Network Analysis
+Nodes are representing each game parameter (e.g., ) and vertices are representing the weight. The way the network expands is thought to be an indicator of the player skill to grasp the system complexity.
+
+<!-- ********** -->
+<!-- CONCLUSION -->
+<!-- ********** -->
 
 # Conclusion
 
-```{r conclusion}
-```
+<!-- ********** -->
+<!-- DISCUSSION -->
+<!-- ********** -->
 
 # Discussion
 
-```{r discussion}
-```
+## Complexity
+Ladyman et al. (2013)
+Maybe link with Diamond, 2013
+
+## Analysis of the game in terms of complexity
+One of AL2049 aim is to know how players explore “complexity” in the game. By complexity,
+
+## Food production complexity in the game
+
+## Limits
+Jeu play 2
+On reste sur l’interaction joueur·euse – apprenant·e
 
 # References
 
-<div id="refs"></div>
+<div id="ref"></div>
 
 # Appendix
 

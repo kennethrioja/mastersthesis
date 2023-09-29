@@ -33,6 +33,6 @@ echo -e "======================================================"
 open ${DOCNAME}
 
 # to automatically close terminal window, uncomment next line
-osascript -e 'tell application "Terminal" to close (every window whose name contains "RENDER RMD TO WORD by Kenneth Rioja")' &
+# osascript -e 'tell application "Terminal" to close (every window whose name contains "RENDER RMD TO WORD by Kenneth Rioja")' &
 
 exit 0
