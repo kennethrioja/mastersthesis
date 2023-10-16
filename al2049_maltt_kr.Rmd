@@ -45,6 +45,8 @@ library(pacman)
 <!-- Establish a territory : claim centrality, make topic generalizations, review items of previous research -->
 In the past decade much research has been focused on ...
 
+For some people, the purpose of making games is art a cultural product, but the way also you make it (Schönfeld, (HEAD symposium)[https://www.hesge.ch/head/evenement/2023/playing-stories-matter-how-narration-drives-innovation-game-design], Oct 12, 2023) – good idea so that people stay for a long time, same $, title lack female inclusive.
+
 ## Play
 
 ## Epistemic games
@@ -55,17 +57,27 @@ Compared to cognitive-dvping games (Bavelier), other games such as…
 
 Zimmerman, 
 
-## Player experience
-
-## Ill-structured problem
-Jonassen (2000) :
-Non optimal solutions
-
 ## Learning in epistemic games
-Exploration …
 
-## Learning / Play analytics
+Exploration ...
+
+Multidimensional ... 
+
+Jonassen (2000) : Non optimal solutions, ill-structured problems
+
+## Learning analytics
+
+@gasevic_etal_2015 : LA is about learning
+
+@long_etal_2011 définition of learning analytics in LAK11
+
+@fergusson_2012 3. origins in the 20th century
+
+See what kind of analytics for such a problem (ill-structured problem, multidimensional)
+
 Epistemic network (https://www.epistemicnetwork.org/)
+
+## Play analytics
 
 <!-- Establishing a niche : counter-claiming; indicating a gap, question raison, continuing a tradition -->
 It remains unclear why ...
@@ -102,6 +114,14 @@ Nous pensons a priori que les joueurs peuvent changer des stratégies au fur et 
 A la suite des analyses, nous devrions être en mesure de formuler de nouvelles hypothèses sur les représentations des joueurs concernant la complexité ? ( à discuter !)
 
 ## Research Questions
+
+Why do we want to analyse the data ? What is the goal of the game for the alimentarium ?
+
+What is the underlying theory ?
+
+Our work is of explanatory matters, coming from data, we want to understand and explain the learning experience (@gray_bergner_2022) how ...
+
+"On a un besoin, il n'en existe pas" gap bw learning analytics and complexity / critical thinking / WM
 
 Our main research question is “Does the game allow players to grasp food system complexity?”
 To be able to answer the main question, we need to ask ourselves :
@@ -207,6 +227,8 @@ nombre de changement de direction
 (nombre d’éléments explorés dans la P1) 
 (ordre d’exploration des éléments dans la P1)
 
+Our indicators cannot measure learning per se, however they measure the way learners may tackle complexity (which was the pedagogical objective).
+
 # Results
 
 ## Descriptive
@@ -273,9 +295,12 @@ One explanation for ...
 ## Complexity
 Ladyman et al. (2013)
 Maybe link with Diamond, 2013
+Morin (1999), preface du directeur général de l'UNESCO : "L'un des défis les plus difficiles à relever sera de modifier nos modes de pensée de façon à faire face à la complexité grandissante, à la rapidité des changements et à l’imprévisible, qui caractérisent notre monde." (p.7)
 
 ## Analysis of the game in terms of complexity
 One of AL2049 aim is to know how players explore “complexity” in the game. By complexity,
+
+In order to evaluate our LA tool, we can use @scheffel_etal_2014 five-dimensional framework, and we see that in terms of 1) Objectives (Awareness, Reflection, Motivation, Behavioural Change), 2) Learning Support (Perceived Usefulness, Recommendation, Activity Classification, Detection of Students at Risk), 3) Learning Measures and Output (Comparability, Effectiveness, Efficiency, Helpfulness), 4) Data Aspects (Transparency, Data Standards, Data Ownership, Privacy) and 5) Organisational Aspects (Availability, Implementation, Training of Educational Stakeholders, Organisational Change). TO EVALUATE.
 
 ## food system complexity in the game
 
@@ -284,8 +309,23 @@ One of AL2049 aim is to know how players explore “complexity” in the game. B
 <!-- Conclusion : limitations, recommandations -->
 This study was limited by ...
 
-Jeu play 2
-On reste sur l’interaction joueur·euse – apprenant·e
+A subsample of participants coming at the museum, but @gasevic_etal_2016 ok not to generalize LA results.
+
+No prior theory on complexity thus having an open-ended way to analyse the data ?
+
+Jeu play 2: On reste sur l’interaction joueur·euse – apprenant·e
+
+## Recommandations following our results
+
+What would the results modify concretely? see @banihashem_etal_2018 's benefits and tick what benefits our method is offering. 
+
+Following @banihashem_etal_2018...
+
+### For learners
+
+### For teachers
+
+### For the museum
 
 <!-- ********** -->
 <!-- CONCLUSION -->
