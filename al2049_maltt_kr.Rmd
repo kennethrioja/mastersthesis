@@ -6,12 +6,14 @@ date: "`r Sys.Date()`"
 output:
   word_document:
     reference_docx: assets/utils/doc_style_tmb.docx
-bibliography: "`r rbbt::bbt_write_bib('assets/utils/bibliography.bib', overwrite = TRUE)`" 
+# bibliography: "`r rbbt::bbt_write_bib('assets/utils/bibliography.bib', overwrite = TRUE)`" 
+# options(error=recover)
+bibliography: "/Users/kenneth_personnel/Desktop/00_Personnel/01_UNIVERSITE/M_MALTT/memoire/mastersthesis/assets/utils/bebe.bib"
 csl: assets/utils/citation_style_apa7th.csl
-
 params:
   doc_subtitle: ""
-
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -24,85 +26,170 @@ set.seed(42)
 ## Load packages
 # install.packages("pacman")
 library(pacman)
-# pacman::p_load(
-#   # insert packages' name here
-# )
+pacman::p_load(
+  "openxlsx",
+  "dplyr",
+  "tidyr",
+  "ggplot2"
+  # insert packages' name here
+)
 
 ## Set working directory to current folder
-# setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # this needs to be commented for 'render_script_mac.command' to work
+setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # this needs to be commented for 'render_script_mac.command' to work
+# getwd() # it must display at least at the end of the path
+# knitr::opts_knit$set(root.dir = getwd())
+# knitr::current_input(dir = TRUE)
 
 ## Load environment or read .csv files
-# load("mydata.RData")
-# df <- read.csv("assets/data/mydata.csv")
+dfr <- read.csv("assets/priv/ng/TBALL_EventVariable_start_until2023_07_18.csv", sep = ";")
+dft <- readxl::read_xlsx("assets/priv/ng/TBALL_EventVariable_start_until2023_07_18_TRIEES.xlsx")
+
+```
+
+```{r descriptive, include=FALSE, echo=TRUE, results='hide'}
+# global
+names(dft)
+str(dft)
+summary(dft)
+
+# table on type, verb, source, variable, typeName, value
+dft_list <- names(dft[,11:(length(names(dft))-1)])
+tableall <- function(df, list) {
+  n = 0
+  for (n in 1:length(list)) {
+    print("------------------------------------")
+    print(list[n])
+    print(table(df[list[n]]), useNa = "always")
+  }
+}
+tableall(dft, dft_list)
+```
+
+```{r gamestates, include=FALSE, echo=TRUE, results='hide'}
+## arrange game states
+# gs <- dft[grep("#", dft$value),]
 
 ```
 
 <!-- ************ -->
 <!-- INTRODUCTION -->
 <!-- ************ -->
+
 # Introduction
 
 <!-- Establish a territory : claim centrality, make topic generalizations, review items of previous research -->
-In the past decade much research has been focused on ...
 
-For some people, the purpose of making games is art a cultural product, but the way also you make it (Schönfeld, (HEAD symposium)[https://www.hesge.ch/head/evenement/2023/playing-stories-matter-how-narration-drives-innovation-game-design], Oct 12, 2023) – good idea so that people stay for a long time, same $, title lack female inclusive.
+Video games intended for educational purposes (Educational Video Games, EdVG) are fascinating creations. Their guiding principle is to translate an educational goal while offering a unique and engaging play experience (@wiemeyer_etal_2016). However, this play experience must have a certain degree of learning outcome, if not the EdVG may remain in limbo. Using grounded models or practice-based experiences, EdVG designers hypothesize that the created learning situation leads to learning outcomes. Furthermore, these situations hold pivotal positions in the game play. In that respect, prior learning hypotheses must be tested. Data collection combined with data analysis may provide observable indicators on players' actions at play. One may say “If you cannot measure it, you cannot improve it”.
 
-## Play
+## Educational Video Games
 
-## Epistemic games
+// What is Educational Video Games? From SVG and different types of SVG, there EdVG, 
 
-We often refer to as serious video games (SVG), games designed to offer a pedagogical use. However, we will use the term epistemic video game (EVG) which is more precise than an SVG in a sense that it takes into account the situation and the subjectivity of the game creates and the interactions it allow (@sanchez_2022).
+We often refer to as serious video games (SVG), games designed to offer a pedagogical use. However, we will use the term epistemic video game (EpVG) which is more precise than an SVG in a sense that it takes into account the situation and the subjectivity of the game creates and the interactions it allows (@sanchez_2022).
+
+// Why is it different from other SVG
+
+// Why is it important in my masters ?
 
 Compared to cognitive-dvping games (Bavelier), other games such as…
 
-Zimmerman, 
+## EdVG Traces
 
-## Learning in epistemic games
+More than simple users, they are players because the game allow concrete action and decision making throughout the game. 
 
-Exploration ...
+We want to make the reader attentive to the term 'traces', which is used in the present work to qualify any game data about players' interactions with the system and does not include metadata or hardware specifications for example.
 
-Multidimensional ... 
+## Analysis of EdVG traces 
 
-Jonassen (2000) : Non optimal solutions, ill-structured problems
+<!-- Establishing a niche : counter-claiming; indicating a gap, question raison, continuing a tradition -->
 
-## Learning analytics
+// Begin with LA > LA in games > LA in EdVG > not in class and cannot say a thing about learning so play analytics
+
+// Learning analytics
 
 @gasevic_etal_2015 : LA is about learning
 
-@long_etal_2011 définition of learning analytics in LAK11
+@lang_etal_2022 : Learning Analytics is the measurement, collection, analysis and reporting of data about learners and their contexts, for purposes of understanding and optimising learning and the environments in which it occurs, as defined back in 2011 for the first LAK, this general definition still holds true even as the field has grown (https://www.solaresearch.org/about/what-is-learning-analytics/)
 
-@fergusson_2012 3. origins in the 20th century
+@ferguson_2012 3. origins in the 20th century
 
 See what kind of analytics for such a problem (ill-structured problem, multidimensional)
 
 Epistemic network (https://www.epistemicnetwork.org/)
 
-## Play analytics
+// Game analytics ?
 
-<!-- Establishing a niche : counter-claiming; indicating a gap, question raison, continuing a tradition -->
-It remains unclear why ...
+// Play analytics ?
 
-How ill-structured problems can be visualised
+// Why "play" analytics ?
+
+Zimmerman
+
+Because learning analytics methods has a focus on disentangling what happens in schools, higher education institutions, here the aim is to focus on the players experience during the game. This is why, this work is rooted within play analytics.
+
+Play Research-based methods
 
 How traces can be analysed ?
 
-However not many have focused on disentangling complexity in an epistemic game.
 
-## Current work
+## PLAY project
 
 <!-- Occupying the niche : outlining purposes, announcing the present research, announcing principal findings, indicating structure -->
-The purpose of this Masters' thesis was to create a method or building an indices allowing to approach such ill-structured problem.
+
+<!-- //Ici rédige environ une page sur le projet, ses enjeux, les résultats attendus du projet : repenser les visites scolaires au musée avec des approches ludiques  & travailler sur des problèmes complexes en lien avec des thématiques sociétales  -->
+
+<!-- Le projet PLAY qui a pour objectif de comprendre comment la ludicisation de visites scolaires au musée, permet  à des apprenants de s’engager dans la résolution de problèmes complexes et non déterministes et, ce faisant,  de développer leur rapport au savoir. -->
+
+This master thesis thus focuses on the analysis of digital traces. The current work is part of the PLAY project (https://www.lip-unige.ch/project/play-playing-for-learning-an-economic-approach-to-human-behavior/) which aims at understanding museum scholar visits under the lens of ludicisation. Instead of focusing on the components making a system more engaging (i.e. gamification, defined as "the use of game design elements in non-game contexts", @deterding_etal_2011), here ludicisation take a step back and broaden the focus to the situation, involving not only the game but also the player(s), the context(s) and their interactions. The result of ludicisation is to convert of an ordinary situation into a perceived play situation (@genvo_2013). Once play is made central, players' engagement is met and, in return, allows to alter their relation to knowledge. Thus, the aim of the PLAY project is to understand how ludicisation of museum scholar visits allows learners to engage in solving complex and non-deterministic problems. 
+
+<!-- "méthodologiques : des avancées sont attendues  sur la conception d’outils de recueil et de traitement de données permettant de conduire des études  combinant learning analytics et approche ethnographique" (...) "sur  l’analyse des interactions épistémiques à partir du recueil et de l’analyse des traces numériques  d’apprentissage (learning analytics) (Siemens & Baker, 2012)." (...). Nous  nous intéresserons plus particulièrement aux stratégies mises en œuvre et aux erreurs. Les données  doivent ainsi permettre une modélisation des apprenants d’un point de vue comportemental mais  également d’un point de vue épistémique à partir par exemple des réponses aux questions posées via  l’application.  -->
+
+One of PLAY expected results is methodological: "progresses are expected on data processing allowing to conduct studies combining [play] analytics and an ethnographic approach." Indeed, the current work is meant to supplement qualitative data such as analyses of video recordings during play sessions. More particularly, "we are interested in the acted strategies and errors. Data should allow to build learners' behavior models". 
+
+<!-- Le projet PLAY permettra de capitaliser sur les travaux antérieurs mais abordera la question des visites de  musées en prenant en compte la nécessité de changer l’expérience du visiteur pour susciter des interactions avec la muséographie, ses pairs et les médiateurs.  -->
+<!-- Trois hypothèses générales seront testées.  -->
+<!-- - La ludicisation permet un niveau d’engagement important et permet l’émergence d’interactions nouvelles  qui peuvent avoir un caractère épistémique.   -->
+<!-- Ainsi, les questions de recherche que nous souhaitons aborder concernent deux volets. - (...) Les questions auxquelles il est nécessaire de répondre portent sur la  nature des interactions (avec leurs pairs, le médiateur, la muséographie) qui se mettent en place lorsque  les élèves investissent le jeu. Il s’agit également d’identifier les éléments à prendre en compte pour  favoriser ces interactions.  -->
+
+nature of the interactions while playing the game + elements favoring these interactions
+
+// Why is it important in my masters ?
+
+However not many have focused on disentangling complexity in an epistemic game.
+
+One of its educational purposes is to “understand the complex relationships between food production system components” (Oliveira et al., 2022). 
+
+### Complexity
+
+// Talk about complexity (Ladyman; Morin) and ill-structured problems.
+
+// Link the previous § Analysis of EdVG and PLAY project goals.
+
+// J'attaque un sujet qui est vierge, j'ai rien et j'invente tout, j'invente les indicateurs
+
+### Ill-structured and non-deterministic problem
+
+Jonassen (2000) : Non optimal solutions, ill-structured problems
+
+It remains unclear how ill-structured problems can be visualized.
+
+## The current work
+
+The purpose of this Masters' thesis is to create a method or building an indices allowing to approach such ill-structured problem.
 
 To follow-up @oliveira_etal_2022 work, "Traces will be collected to see how it is used by the players and how their food conceptions evolve" we will...
 
 Grasping food system complexity
 
+Actuellement, aucune méthodologie n’a été mise en place pour analyser ces données. De même, les méthodes proposées dans le récent manuel des Learning Analytics (Lang et al., 2022) ne traduisent pas la situation spécifique dans laquelle le jeu s’insère
+
 ## A priori hypotheses
 
 L’analyse devrait montrer différentes manières de jouer par rapport à : 
 la recherche d’un optimum entre plaisir, santé et bien-être : la recherche d’un juste équilibre, (2) privilégier une des trois dimensions (3) sacrifier une des trois dimensions 
--> Nous faisons l’hypothèse que les joueurs dans la partie 1 se focalisent sur la santé, puis dans la partie 2, ils veulent rester au centre des trois (équilibre entre santé, bien-être et plaisir) et, qu’ils prennent ensuite une direction particulière en se rendant compte qu’ils n’arrivent pas à trouver l’équilibre parfait.  (changement de stratégie de jeu). 
-voir si un effet après les fake news ? interactions avec les fake news ? 
+-> Nous faisons l’hypothèse que les joueurs dans la partie 1 se focalisent sur la santé (what we will call analytic reasoning), puis dans la partie 2, ils veulent rester au centre des trois (équilibre entre santé, bien-être et plaisir, what we will call systemic reasoning) et, qu’ils prennent ensuite une direction particulière en se rendant compte qu’ils n’arrivent pas à trouver l’équilibre parfait.  (changement de stratégie de jeu). 
+
+(voir si un effet après les fake news ? interactions avec les fake news ? )
 
 l’exploration des différentes sources d'énergie (humaine, renouvelable et fossile) : (1) privilégier l’une des trois sources d’énergie, (2) privilégier 2 des 3 sources d’énergie (3) utiliser les trois les sources d’énergie de manière équilibrée 
 -> nous faisons l’hypothèse que ….à compléter. attention le problème de l’énergie fossil avec le fait que’ils pensent que c’est de l’eau ! 
@@ -111,7 +198,7 @@ Nous pensons a priori que les joueurs peuvent changer des stratégies au fur et 
 
 ## A posteriori hypotheses
 
-A la suite des analyses, nous devrions être en mesure de formuler de nouvelles hypothèses sur les représentations des joueurs concernant la complexité ? ( à discuter !)
+A la suite des analyses, nous devrions être en mesure de formuler de nouvelles hypothèses sur les représentations des joueurs concernant la complexité ? ( à discuter ! ou voir tableau Simon sur les dimensions de la complexité)
 
 ## Research Questions
 
@@ -123,21 +210,23 @@ Our work is of explanatory matters, coming from data, we want to understand and 
 
 "On a un besoin, il n'en existe pas" gap bw learning analytics and complexity / critical thinking / WM
 
-Our main research question is “Does the game allow players to grasp food system complexity?”
-To be able to answer the main question, we need to ask ourselves :
-
 ### General
 <!-- (choisir la bonne formulation entre les propositions ci-dessous) -->
-Comment les joueurs essaient-ils de remplir la mission du jeu ? Comment les joueurs jouent-ils au jeu ? Comment les joueurs tiennent compte de la complexité ? Comment les joueurs jouent-ils avec la complexité ? Quelles stratégies les joueurs mettent-ils en place pour explorer la complexité dans le jeu AL2049 ?
+
+<!-- Comment les joueurs essaient-ils de remplir la mission du jeu ? Comment les joueurs jouent-ils au jeu ? Comment les joueurs tiennent compte de la complexité ? Comment les joueurs jouent-ils avec la complexité ? Quelles stratégies les joueurs mettent-ils en place pour explorer la complexité dans le jeu AL2049 ? Le jeu permet-il aux joueur·euse·s de saisir certains enjeux de la complexité et d'interagir avec celle-ci ? Si oui comment ? -->
+
+Our main research question is **"How the game allow players to grasp the food system complexity stakes and how do they interact with them"**
 
 ### Specific 1
 
-Quelle est l’évolution diachronique des scores de plaisir, santé et bien-être ? Quelle est l’évolution dans le temps du ratio entre les scores de santé, bien-être, plaisir ? Quels sont les optimums atteints par les différents groupes pour le ratio entre bien-être, plaisir et santé ? ( Qu’est-ce qui est fait avant et après ? Quelles sont les différentes statégies observables dans la gestion de ces scores ?) 
+<!-- Quelle est l’évolution diachronique des scores de plaisir, santé et bien-être ? Quelle est l’évolution dans le temps du ratio entre les scores de santé, bien-être, plaisir ? Quels sont les optimums atteints par les différents groupes pour le ratio entre bien-être, plaisir et santé ? ( Qu’est-ce qui est fait avant et après ? Quelles sont les différentes statégies observables dans la gestion de ces scores ?)  -->
+What game indicators allow to detect a change in strategy ?
 
 ### Specific 2
 
-Comment les joueurs utilisent-ils les différents types d’énergie dans la première partie du jeu ? dans la deuxième partie du jeu ? tout au long du jeu ? Dans quelle mesure il y’a t’il des changements de stratégies dans l’utilisation des énergies ? 
-
+<!-- Comment les joueurs utilisent-ils les différents types d’énergie dans la première partie du jeu ? dans la deuxième partie du jeu ? tout au long du jeu ? Dans quelle mesure il y’a t’il des changements de stratégies dans l’utilisation des énergies ?  -->
+<!-- Quels sont les indicateurs du jeu permettant de déterminer une approche systémique ou analytique de la complexité ? -->
+How to visualize these game indicators to allow researchers to determine the players' analytic or systemic approach to complexity?
 
 <!-- ******* -->
 <!-- METHODS -->
@@ -147,11 +236,9 @@ Comment les joueurs utilisent-ils les différents types d’énergie dans la pre
 
 ## AL2049
 
-### Description
+AL2049 is an open-ended construction and resource management simulation game. It can be mirrored with commercially-available video games such as SimCity, ThemePark or Cities:Skylines. AL2049 is currently playable at the Alimentarium, a food museum based in Vevey (Switzerland, more info : https://www.alimentarium.org/fr/activities/al2049-lescape-game-de-lalimentarium). This game has been created using design-based research (@oliveira_etal_2022).
 
-AL2049 is an open-ended city-building game, it can also be called a construction and resource management simulation game. It can be mirrored with commercially-available video games such as SimCity, ThemePark or Cities:Skylines. AL2049 is currently playable at the Alimentarium, a food museum based in Vevey (Switzerland, more info : https://www.alimentarium.org/fr/activities/al2049-lescape-game-de-lalimentarium). This game has been created using design-based research (@oliveira_etal_2022).
-
-The game is played on tablets, by groups of three to four people. Participants’ age ranges from r min(dfage). The game first appears to the players with a map of the museum. Players must physically walk to the different places of the museum to take a picture of the place and unlock a building slot (see. Fig.X). Once the building slot freed, players must choose between Petrol, Solar or Human Ressources to build a facility. Facilities ranges from … .
+The game is played on tablets, by groups of three to four people. Participants’ age ranges from r min(dfage). The game first appears to the players with a map of the museum. The map shows locked **zones**. Players must physically walk to the different places of the museum to take a picture of the place and unlock the zone. Once done, players must choose between different types of **energy** to build different forms of **facilities**. Energy used can be either petrol, solar or human. Facilities ranges from … .
 
 The game is supervised by a Game Master (‘GM’, usually a museum worker who has knowledge on the game). At the beginning the game, the latter sets the main goal as : feeding everyone. Participants are free to move around the museum for X minutes. Once they come back, the GM enable a new game feature …
 
@@ -159,7 +246,15 @@ AL2049 aims at developing players skill to think about food system complexity.
 
 The data used for this Masters' thesis were collected by ...
 
+AL2049, an educational video game, follows the later statements. It has been played by thousands of pupils’ groups in a museum and digital traces have been collected from their play session. Its development originates from research-based design, that is, researchers, the curator of the Alimentarium museum and game developers worked hand in hand to create AL2049. One of its educational purposes is to “understand the complex relationships between food production system components” (Oliveira et al., 2022). 
+
+The aim of the team is to test whether this later educational goal can be tested through the gameplay data. I will focus on one way to test it. How players change their strategies throughout the game session. It will thus be a hint to their understanding of the complex relationships between food production system components.
+
+problèmes complexes et non-déterministes, à proposer et  défendre des solutions raisonnées et argumentées et à réviser les rapports qu’ils entretiennent avec le savoir,  c’est-à-dire se développer d’un point de vue épistémique. Dans la littérature anglo-saxonne, ces problèmes  sont qualifiés de ill-structured problems (Jonassen, 2000; King & Kitchener, 1994). Ils se caractérisent par le fait  qu’ils ne peuvent pas être résolus avec un haut degré de certitude et que plusieurs solutions peuvent être  proposées, aucune n’étant ni certaine, ni vérifiable, y compris par des experts
+
 ### Pedagogical goals
+
+Un des objectifs pédagogiques du jeu est de « comprendre les relations complexes entre les composants du système de production alimentaire » (@oliveira_etal_2022). Lors de la co-conception du jeu AL2049 rassemblant chercheur·euse·s, conservateur de musée et développeur·euse·s, leur objectif était de transcrire cet objectif pédagogique en expérience de jeu. Comment pouvons-nous confirmer ou infirmer cet objectif ? Le jeu a été joué plus d’une centaine de fois au musée de l’Alimentarium, à Vevey et des traces numériques ont été récoltées.
 
 What does "learning about complexity" means ? What are the processes and results from this kind of knowledge ? What is the player capable of doing when she learned how to solve ill-structured problems ?
 
@@ -167,6 +262,10 @@ One of this masters' thesis goal is rooting from the traces, make play strategie
 Analyses of the traces should reflect the designers’ goals (volontés)
 
 Objectif pédago : On ne veut pas créer une situation complexe, mais sensbilité les jeunes à ce que la complexité existe, pour réaliser qu’elle existe on doit démorceler celleci pour rendre visible ce qui la caractérise. 
+
+## A priori analysis
+
+An a priori analysis was performed before the current analysis of digital traces. It involved a researcher involved in the whole design process of AL2049. We decomposed complexity into nine complexity criteria for food production systems (for details, see 'Complexity' chapter). The nine criteria are : 1) Nonlinearity, 2) Feedback, 3) Spontaneous order, 4) Robustness and lack of central control, 5) Emergence, 6) Hierarchical organisation, 7) Numerosity, 8) Systemicity (interdependence), 9) Incertainty and unpredictability. For each criteria, first, we described how the chosen complexity criteria was present in AL2049 (e.g., how nonlinearity was part of the game). Second, the expected digital trace linked to the situation (e.g., the number of change in the 'FoodProduction' variable). Third, an a priori hypothesis involving the trace (e.g., in Phase I, 'FoodProduction' is significantly chosen by players over the other variables).
 
 <!-- ******* -->
 <!-- RESULTS -->
@@ -180,6 +279,8 @@ Objectif pédago : On ne veut pas créer une situation complexe, mais sensbilit�
 <!-- Faire ça de manière systématique, 4 pages d'analyse du jeu en fonction des critères trouvés sur complexité.  -->
 
 How AL2049 game designers thought to transcribe complexity in the game, this will lead to objective indicators that can be found in the game's traces. 
+
+Analytique vs systémique? Voir 06.12.23
 
 # Observable indicators
 <!-- Comment ça se voit dans les traces, quels indicateurs (observables, calculs, représentations).  -->
@@ -206,26 +307,25 @@ sept savoirs @morin_1999
 
 # Indicators
 
-les valeurs associées à la variable santé en fonction du timestamp
-les valeurs associées à la variable plaisir en fonction du timestamp
-les valeurs associées à la variable bien-être en fonction du timestamp
-l’équilibre optimale mesurée entre les 3 éléments 
-variable temps (timestamp) 
-les valeurs assocités à la variables énergie fossile en fonction du timestamp
-les valeurs assocités à la variables énergie humain en fonction du timestamp
-les valeurs assocités à la variables énergie verte en fonction du timestamp
-/ variable temps (timestamp)
-nbr de fois énergie fossile/verte/humaine ajoutée durant la P1
-nbr de fois énergie fossile/verte/humaine enlevée durant la P1
-niveaux des énergies fossile/verte/humaine à la fin de la P1
-nbr de fois énergie fossile/verte/humaine ajoutée durant la P2
-nbr de fois énergie fossile/verte/humaine enlevée durant la P2
-niveaux des énergies fossile/verte/humaine à la fin de la P2
-
-Nbr de fois où les joueurs consultent le summary
-nombre de changement de direction
-(nombre d’éléments explorés dans la P1) 
-(ordre d’exploration des éléments dans la P1)
+<!-- les valeurs associées à la variable santé en fonction du timestamp -->
+<!-- les valeurs associées à la variable plaisir en fonction du timestamp -->
+<!-- les valeurs associées à la variable bien-être en fonction du timestamp -->
+<!-- l’équilibre optimale mesurée entre les 3 éléments  -->
+<!-- variable temps (timestamp)  -->
+<!-- les valeurs assocités à la variables énergie fossile en fonction du timestamp -->
+<!-- les valeurs assocités à la variables énergie humain en fonction du timestamp -->
+<!-- les valeurs assocités à la variables énergie verte en fonction du timestamp -->
+<!-- / variable temps (timestamp) -->
+<!-- nbr de fois énergie fossile/verte/humaine ajoutée durant la P1 -->
+<!-- nbr de fois énergie fossile/verte/humaine enlevée durant la P1 -->
+<!-- niveaux des énergies fossile/verte/humaine à la fin de la P1 -->
+<!-- nbr de fois énergie fossile/verte/humaine ajoutée durant la P2 -->
+<!-- nbr de fois énergie fossile/verte/humaine enlevée durant la P2 -->
+<!-- niveaux des énergies fossile/verte/humaine à la fin de la P2 -->
+<!-- Nbr de fois où les joueurs consultent le summary -->
+<!-- nombre de changement de direction -->
+<!-- (nombre d’éléments explorés dans la P1)  -->
+<!-- (ordre d’exploration des éléments dans la P1) -->
 
 Our indicators cannot measure learning per se, however they measure the way learners may tackle complexity (which was the pedagogical objective).
 
@@ -326,6 +426,8 @@ Following @banihashem_etal_2018...
 ### For teachers
 
 ### For the museum
+
+PLAY objectives : "éthiques : des recommandations seront  formulées pour la conception de situations ludiques en contexte éducatif"
 
 <!-- ********** -->
 <!-- CONCLUSION -->
