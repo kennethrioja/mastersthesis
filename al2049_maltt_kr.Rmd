@@ -6,9 +6,8 @@ date: "`r Sys.Date()`"
 output:
   word_document:
     reference_docx: assets/utils/doc_style_tmb.docx
-# bibliography: "`r rbbt::bbt_write_bib('assets/utils/bibliography.bib', overwrite = TRUE)`" 
-# options(error=recover)
-bibliography: "/Users/kenneth_personnel/Desktop/00_Personnel/01_UNIVERSITE/M_MALTT/memoire/mastersthesis/assets/utils/bebe.bib"
+
+bibliography: "`r rbbt::bbt_write_bib('/Users/kenneth_personnel/Desktop/00_Personnel/01_UNIVERSITE/M_MALTT/memoire/mastersthesis/assets/utils/bibliography.bib', overwrite = TRUE)`"
 csl: assets/utils/citation_style_apa7th.csl
 params:
   doc_subtitle: ""
@@ -16,6 +15,7 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- Setup -->
 ```{r setup, include=FALSE}
 ## clear workspace
 rm(list=ls())
@@ -30,22 +30,25 @@ pacman::p_load(
   "openxlsx",
   "dplyr",
   "tidyr",
-  "ggplot2"
+  "ggplot2",
+  "stringr" 
   # insert packages' name here
 )
 
 ## Set working directory to current folder
 setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # this needs to be commented for 'render_script_mac.command' to work
 # getwd() # it must display at least at the end of the path
-# knitr::opts_knit$set(root.dir = getwd())
-# knitr::current_input(dir = TRUE)
+
+## For TOC : https://community.rstudio.com/t/starting-toc-on-a-new-page-after-title-page-in-rmd-to-word-doc-output/36081/2
+devtools::source_gist("c83e078bf8c81b035e32c3fc0cf04ee8",
+                      filename = 'render_toc.R')
 
 ## Load environment or read .csv files
 dfr <- read.csv("assets/priv/ng/TBALL_EventVariable_start_until2023_07_18.csv", sep = ";")
 dft <- readxl::read_xlsx("assets/priv/ng/TBALL_EventVariable_start_until2023_07_18_TRIEES.xlsx")
-
 ```
 
+#<!-- Descriptive statistics -->
 ```{r descriptive, include=FALSE, echo=TRUE, results='hide'}
 # global
 names(dft)
@@ -65,10 +68,188 @@ tableall <- function(df, list) {
 tableall(dft, dft_list)
 ```
 
+#<!-- GS -->
 ```{r gamestates, include=FALSE, echo=TRUE, results='hide'}
-## arrange game states
-# gs <- dft[grep("#", dft$value),]
+## translate game states
 
+# Mapping of numeric values to character values for the cards
+card_code <- c(
+  "1" = "chicken",
+  "2" = "cow",
+  "3" = "fish",
+  "4" = "insect",
+  "5" = "crops",
+  "6" = "leguminous",
+  "7" = "veggies",
+  "8" = "meat_transfo",
+  "9" = "vegetarian_transfo",
+  "10" = "resto",
+  "11" = "market",
+  "12" = "lab",
+  "13" = "hunting"
+)
+
+dfs <- dft %>%
+  
+  ## to keep only the GS lines
+  # dplyr::filter(variable == 'GameState') %>%
+  
+  ## split GS by # creating s for state, p for placement, n for news
+  dplyr::mutate(
+    s = dplyr::if_else(variable == 'GameState', stringr::str_split(value, '#', simplify = TRUE)[, 1], NA_character_),
+    p = dplyr::if_else(variable == 'GameState', stringr::str_split(value, '#', simplify = TRUE)[, 2], NA_character_),
+    n = dplyr::if_else(variable == 'GameState', stringr::str_split(value, '#', simplify = TRUE)[, 3], NA_character_)
+  ) %>%
+  
+  ## split p by rooms
+  tidyr::separate(p, into = c("p_r1", "p_r2", "p_r3", "p_r4", "p_r5", "p_r6", "p_r8", "p_ext", "null"), sep = ";", fill = "right") %>%
+  select(-starts_with("null")) %>% # this is the last split string which corresponds to nothing
+  
+  ## split each room by card and energy(human*green*fossil)
+  dplyr::mutate(
+    
+    ## room 1
+    p_r1_card = dplyr::if_else(!grepl("!", p_r1), p_r1, stringr::str_split(p_r1, "!", simplify = TRUE)[, 1]),
+    p_r1_energy = dplyr::if_else(!grepl("!", p_r1), p_r1, stringr::str_split(p_r1, "!", simplify = TRUE)[, 2]),
+    p_r1_option = dplyr::if_else(!grepl("!", p_r1), p_r1, stringr::str_split(p_r1, "!", simplify = TRUE)[, 3]),
+    p_r1_human = dplyr::if_else(!grepl("\\*", p_r1_energy), p_r1_energy, stringr::str_split(p_r1_energy, "\\*", simplify = TRUE)[, 1]),
+    p_r1_green = dplyr::if_else(!grepl("\\*", p_r1_energy), p_r1_energy, stringr::str_split(p_r1_energy, "\\*", simplify = TRUE)[, 2]),
+    p_r1_fossil = dplyr::if_else(!grepl("\\*", p_r1_energy), p_r1_energy, stringr::str_split(p_r1_energy, "\\*", simplify = TRUE)[, 3]),
+    p_r1 = NULL,
+    p_r1_energy = NULL,
+    
+    ## room 2
+    p_r2_card = dplyr::if_else(!grepl("!", p_r2), p_r2, stringr::str_split(p_r2, "!", simplify = TRUE)[, 1]),
+    p_r2_energy = dplyr::if_else(!grepl("!", p_r2), p_r2, stringr::str_split(p_r2, "!", simplify = TRUE)[, 2]),
+    p_r2_option = dplyr::if_else(!grepl("!", p_r2), p_r2, stringr::str_split(p_r2, "!", simplify = TRUE)[, 3]),
+    p_r2_human = dplyr::if_else(!grepl("\\*", p_r2_energy), p_r2_energy, stringr::str_split(p_r2_energy, "\\*", simplify = TRUE)[, 1]),
+    p_r2_green = dplyr::if_else(!grepl("\\*", p_r2_energy), p_r2_energy, stringr::str_split(p_r2_energy, "\\*", simplify = TRUE)[, 2]),
+    p_r2_fossil = dplyr::if_else(!grepl("\\*", p_r2_energy), p_r2_energy, stringr::str_split(p_r2_energy, "\\*", simplify = TRUE)[, 3]),
+    p_r2 = NULL,
+    p_r2_energy = NULL,
+    
+    ## room 3
+    p_r3_card = dplyr::if_else(!grepl("!", p_r3), p_r3, stringr::str_split(p_r3, "!", simplify = TRUE)[, 1]),
+    p_r3_energy = dplyr::if_else(!grepl("!", p_r3), p_r3, stringr::str_split(p_r3, "!", simplify = TRUE)[, 2]),
+    p_r3_option = dplyr::if_else(!grepl("!", p_r3), p_r3, stringr::str_split(p_r3, "!", simplify = TRUE)[, 3]),
+    p_r3_human = dplyr::if_else(!grepl("\\*", p_r3_energy), p_r3_energy, stringr::str_split(p_r3_energy, "\\*", simplify = TRUE)[, 1]),
+    p_r3_green = dplyr::if_else(!grepl("\\*", p_r3_energy), p_r3_energy, stringr::str_split(p_r3_energy, "\\*", simplify = TRUE)[, 2]),
+    p_r3_fossil = dplyr::if_else(!grepl("\\*", p_r3_energy), p_r3_energy, stringr::str_split(p_r3_energy, "\\*", simplify = TRUE)[, 3]),
+    p_r3 = NULL,
+    p_r3_energy = NULL,
+    
+    ## room 4
+    p_r4_card = dplyr::if_else(!grepl("!", p_r4), p_r4, stringr::str_split(p_r4, "!", simplify = TRUE)[, 1]),
+    p_r4_energy = dplyr::if_else(!grepl("!", p_r4), p_r4, stringr::str_split(p_r4, "!", simplify = TRUE)[, 2]),
+    p_r4_option = dplyr::if_else(!grepl("!", p_r4), p_r4, stringr::str_split(p_r4, "!", simplify = TRUE)[, 3]),
+    p_r4_human = dplyr::if_else(!grepl("\\*", p_r4_energy), p_r4_energy, stringr::str_split(p_r4_energy, "\\*", simplify = TRUE)[, 1]),
+    p_r4_green = dplyr::if_else(!grepl("\\*", p_r4_energy), p_r4_energy, stringr::str_split(p_r4_energy, "\\*", simplify = TRUE)[, 2]),
+    p_r4_fossil = dplyr::if_else(!grepl("\\*", p_r4_energy), p_r4_energy, stringr::str_split(p_r4_energy, "\\*", simplify = TRUE)[, 3]),
+    p_r4 = NULL,
+    p_r4_energy = NULL,
+    
+    ## room 5
+    p_r5_card = dplyr::if_else(!grepl("!", p_r5), p_r5, stringr::str_split(p_r5, "!", simplify = TRUE)[, 1]),
+    p_r5_energy = dplyr::if_else(!grepl("!", p_r5), p_r5, stringr::str_split(p_r5, "!", simplify = TRUE)[, 2]),
+    # p_r5_option = dplyr::if_else(!grepl("!", p_r5), p_r5, stringr::str_split(p_r5, "!", simplify = TRUE)[, 3]), # no options
+    p_r5_human = dplyr::if_else(!grepl("\\*", p_r5_energy), p_r5_energy, stringr::str_split(p_r5_energy, "\\*", simplify = TRUE)[, 1]),
+    p_r5_green = dplyr::if_else(!grepl("\\*", p_r5_energy), p_r5_energy, stringr::str_split(p_r5_energy, "\\*", simplify = TRUE)[, 2]),
+    p_r5_fossil = dplyr::if_else(!grepl("\\*", p_r5_energy), p_r5_energy, stringr::str_split(p_r5_energy, "\\*", simplify = TRUE)[, 3]),
+    p_r5 = NULL,
+    p_r5_energy = NULL,
+    
+    ## room 6
+    p_r6_card = dplyr::if_else(!grepl("!", p_r6), p_r6, stringr::str_split(p_r6, "!", simplify = TRUE)[, 1]),
+    p_r6_energy = dplyr::if_else(!grepl("!", p_r6), p_r6, stringr::str_split(p_r6, "!", simplify = TRUE)[, 2]),    
+    # p_r6_option = dplyr::if_else(!grepl("!", p_r6), p_r6, stringr::str_split(p_r6, "!", simplify = TRUE)[, 3]),
+    p_r6_human = dplyr::if_else(!grepl("\\*", p_r6_energy), p_r6_energy, stringr::str_split(p_r6_energy, "\\*", simplify = TRUE)[, 1]),
+    p_r6_green = dplyr::if_else(!grepl("\\*", p_r6_energy), p_r6_energy, stringr::str_split(p_r6_energy, "\\*", simplify = TRUE)[, 2]),
+    p_r6_fossil = dplyr::if_else(!grepl("\\*", p_r6_energy), p_r6_energy, stringr::str_split(p_r6_energy, "\\*", simplify = TRUE)[, 3]),
+    p_r6 = NULL,
+    p_r6_energy = NULL,
+    
+    ## room 8
+    p_r8_card = dplyr::if_else(!grepl("!", p_r8), p_r8, stringr::str_split(p_r8, "!", simplify = TRUE)[, 1]),
+    p_r8_energy = dplyr::if_else(!grepl("!", p_r8), p_r8, stringr::str_split(p_r8, "!", simplify = TRUE)[, 2]),
+    # p_r8_option = dplyr::if_else(!grepl("!", p_r8), p_r8, stringr::str_split(p_r8, "!", simplify = TRUE)[, 3]),
+    p_r8_human = dplyr::if_else(!grepl("\\*", p_r8_energy), p_r8_energy, stringr::str_split(p_r8_energy, "\\*", simplify = TRUE)[, 1]),
+    p_r8_green = dplyr::if_else(!grepl("\\*", p_r8_energy), p_r8_energy, stringr::str_split(p_r8_energy, "\\*", simplify = TRUE)[, 2]),
+    p_r8_fossil = dplyr::if_else(!grepl("\\*", p_r8_energy), p_r8_energy, stringr::str_split(p_r8_energy, "\\*", simplify = TRUE)[, 3]),
+    p_r8 = NULL,
+    p_r8_energy = NULL,
+    
+    ## ext
+    p_ext_card = dplyr::if_else(!grepl("!", p_ext), p_ext, stringr::str_split(p_ext, "!", simplify = TRUE)[, 1]),
+    p_ext_energy = dplyr::if_else(!grepl("!", p_ext), p_ext, stringr::str_split(p_ext, "!", simplify = TRUE)[, 2]),
+    # p_ext_option = dplyr::if_else(!grepl("!", p_ext), p_ext, stringr::str_split(p_ext, "!", simplify = TRUE)[, 3]),
+    p_ext_human = dplyr::if_else(!grepl("\\*", p_ext_energy), p_ext_energy, stringr::str_split(p_ext_energy, "\\*", simplify = TRUE)[, 1]),
+    p_ext_green = dplyr::if_else(!grepl("\\*", p_ext_energy), p_ext_energy, stringr::str_split(p_ext_energy, "\\*", simplify = TRUE)[, 2]),
+    p_ext_fossil = dplyr::if_else(!grepl("\\*", p_ext_energy), p_ext_energy, stringr::str_split(p_ext_energy, "\\*", simplify = TRUE)[, 3]),
+    p_ext = NULL,
+    p_ext_energy = NULL,
+  ) %>% 
+  
+  ## separate the news
+  tidyr::separate(n, into = c("n_opened", "n_appeared"), sep = "\\*", fill = "right") %>% 
+
+  ## change values of card columns to code
+  dplyr::mutate_at(dplyr::vars(ends_with("_card")), ~dplyr::recode(., !!!card_code))
+
+# dir.create("./output/data", showWarnings = T)
+# write.csv(df, "./output/data/TBALL_EventVariable_start_until2023_07_18_TRIEES_GAMESTATES.csv")
+```
+
+#<!-- GV -->
+```{r gamevars, include=FALSE, echo=TRUE, results='hide'}
+
+variable_list <- c( 
+    "FoodProduction",
+    "FoodLoss",
+    "Pollution",
+    "Co2Emission",
+    "Pleasure",
+    "WorkAmount",
+    "FoodDiversity",
+    "Health",
+    "WellBeing",
+    "EnergyHuman",
+    "EnergyGreen",
+    "EnergyFossil"
+)
+
+## convert the variable vector into columns
+dfv <- dfs %>%
+  
+  ## create the variable columns
+  `is.na<-`(variable_list) %>% 
+  
+  ## spread the values to the corresponding columns
+  tidyr::spread(key = variable, value = value) %>% 
+  dplyr::select(-`<NA>`) %>% 
+  
+  ## fill down all the values
+  tidyr::fill(c("FoodProduction", "FoodLoss", "Pollution", "Co2Emission", "Pleasure", "WorkAmount", "FoodDiversity", "Health", "WellBeing", "EnergyHuman", "EnergyGreen", "EnergyFossil")) %>%
+
+  ## filter out typeName == Single
+  filter(typeName == "String" | is.na(typeName))
+
+
+```
+
+
+<!-- page break -->
+```{=openxml}
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
+```
+
+<!-- TOC -->
+```{r toc, echo=FALSE} 
+render_toc("al2049_maltt_kr.Rmd")
+```
+
+<!-- page break -->
+```{=openxml}
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
 ```
 
 <!-- ************ -->
@@ -79,7 +260,7 @@ tableall(dft, dft_list)
 
 <!-- Establish a territory : claim centrality, make topic generalizations, review items of previous research -->
 
-Video games intended for educational purposes (Educational Video Games, EdVG) are fascinating creations. Their guiding principle is to translate an educational goal while offering a unique and engaging play experience (@wiemeyer_etal_2016). However, this play experience must have a certain degree of learning outcome, if not the EdVG may remain in limbo. Using grounded models or practice-based experiences, EdVG designers hypothesize that the created learning situation leads to learning outcomes. Furthermore, these situations hold pivotal positions in the game play. In that respect, prior learning hypotheses must be tested. Data collection combined with data analysis may provide observable indicators on players' actions at play. One may say “If you cannot measure it, you cannot improve it”.
+Video games intended for educational purposes (Educational Video Games, EdVG) are fascinating creations. Their guiding principle is to translate an educational goal while offering a unique and engaging play experience. However, this play experience must have a certain degree of learning outcome, if not the EdVG may remain in limbo. Using grounded models (for an overview, see @wiemeyer_etal_2016) or practice-based experiences, EdVG designers hypothesize that the created learning situation leads to learning outcomes. Furthermore, these situations hold pivotal positions in the game play. In that respect, prior learning hypotheses must be tested. Data collection combined with data analysis may provide observable indicators on players' actions at play. One may say “If you cannot measure it, you cannot improve it”.
 
 ## Educational Video Games
 
@@ -166,6 +347,10 @@ One of its educational purposes is to “understand the complex relationships be
 // Link the previous § Analysis of EdVG and PLAY project goals.
 
 // J'attaque un sujet qui est vierge, j'ai rien et j'invente tout, j'invente les indicateurs
+
+Ladyman et al. (2013)
+Maybe link with Diamond, 2013 when talk about analytic/systemic
+Morin (1999), preface du directeur général de l'UNESCO : "L'un des défis les plus difficiles à relever sera de modifier nos modes de pensée de façon à faire face à la complexité grandissante, à la rapidité des changements et à l’imprévisible, qui caractérisent notre monde." (p.7)
 
 ### Ill-structured and non-deterministic problem
 
@@ -267,6 +452,11 @@ Objectif pédago : On ne veut pas créer une situation complexe, mais sensbilit�
 
 An a priori analysis was performed before the current analysis of digital traces. It involved a researcher involved in the whole design process of AL2049. We decomposed complexity into nine complexity criteria for food production systems (for details, see 'Complexity' chapter). The nine criteria are : 1) Nonlinearity, 2) Feedback, 3) Spontaneous order, 4) Robustness and lack of central control, 5) Emergence, 6) Hierarchical organisation, 7) Numerosity, 8) Systemicity (interdependence), 9) Incertainty and unpredictability. For each criteria, first, we described how the chosen complexity criteria was present in AL2049 (e.g., how nonlinearity was part of the game). Second, the expected digital trace linked to the situation (e.g., the number of change in the 'FoodProduction' variable). Third, an a priori hypothesis involving the trace (e.g., in Phase I, 'FoodProduction' is significantly chosen by players over the other variables).
 
+Les critères de complexité au regard du gameplay 
+Comment les matcher avec des indicateurs, est-ce que ça évolue dans le temps, tes indicateurs peuvent évoluer 
+critère de complexité → évolution dans le temps 
+Finalité : Affirmer / confirmer que AL2049 rend compte de la complexité du système alimentaire ?
+
 <!-- ******* -->
 <!-- RESULTS -->
 <!-- ******* -->
@@ -275,37 +465,13 @@ An a priori analysis was performed before the current analysis of digital traces
 <!--   - Indicateurs au niveau du jeu -->
 <!--   - Indicateurs au niveau du joueur (c'est quoi que d'apprendre à se dépatouiller avec les syst complexe) -->
 
-# Criteria of food system complexity transcribed by AL2049
-<!-- Faire ça de manière systématique, 4 pages d'analyse du jeu en fonction des critères trouvés sur complexité.  -->
+# Results
 
-How AL2049 game designers thought to transcribe complexity in the game, this will lead to objective indicators that can be found in the game's traces. 
+## H1: Indicators
 
-Analytique vs systémique? Voir 06.12.23
+### Data dictionnary
 
-# Observable indicators
-<!-- Comment ça se voit dans les traces, quels indicateurs (observables, calculs, représentations).  -->
-
-vision linéaire vont prendre en compte que d’un sens (ex. que Santé, que bienêtre, que population…), ALORS que l’objectif pédago est que les élèves doivent être capables de prendre en compte multiple variables (Task switching) … LIEN AVEC EF (Diamond, 2013): WM/INHIB/SWITCHING
-
-<Insert table from Simon to resume Complexity criteria and Indicators>
-
-|     Critère complexité                   |     Situation réelle (complexité de la production alimentaire)    |     Situation métaphorisée (game, mécaniques de jeu)                  |     Interaction joueur-jeu (play, traces)    |   |
-|------------------------------------------|-------------------------------------------------------------------|-----------------------------------------------------------------------|----------------------------------------------|---|
-|     1. Non-linéaire                      |                                                                   |     Y = Ax + by + cz      Ex. conséquences multiples de -1 pétrole    |                                              |   |
-|     2. Feedback                          |                                                                   |     -1 pétrole DONNE…                                                 |                                              |   |
-|     3. Ordre spontané                    |                                                                   |     Bof…                                                              |                                              |   |
-|     4. Robustesse                        |                                                                   |     Bof…                                                              |                                              |   |
-|     5. Emergence                         |                                                                   |     Debrifing ?                                                       |                                              |   |
-|     6. Organisation hiérarchique         |                                                                   |     Well-being, santé, pop                                            |                                              |   |
-|     7. Numérosité                        |                                                                   |     Nombre de noeuds                                                  |                                              |   |
-|     8. Systémicité (~interdépendance)    |                                                                   |     Deuxième partie du jeu                                            |                                              |   |
-|     9. Incertutude et impérvisibilité    |                                                                   |                                                                       |     Vision opaque de relations cachées       |   | %>% 
-
-# Expected skill
-
-sept savoirs @morin_1999
-
-# Indicators
+Suppl material
 
 <!-- les valeurs associées à la variable santé en fonction du timestamp -->
 <!-- les valeurs associées à la variable plaisir en fonction du timestamp -->
@@ -327,17 +493,25 @@ sept savoirs @morin_1999
 <!-- (nombre d’éléments explorés dans la P1)  -->
 <!-- (ordre d’exploration des éléments dans la P1) -->
 
-Our indicators cannot measure learning per se, however they measure the way learners may tackle complexity (which was the pedagogical objective).
-
-# Results
-
-## Descriptive
+### Criteria of food system complexity transcribed by AL2049
+<!-- Faire ça de manière systématique, 4 pages d'analyse du jeu en fonction des critères trouvés sur complexité.  -->
 
 How many times do they come back to 0 ?
 
-## Clustering
+How AL2049 game designers thought to transcribe complexity in the game, this will lead to objective indicators that can be found in the game's traces. 
 
-## 3D graph (X(health)Y(wellbeing)Z(netfood) on TIME) OR Triangle on time
+Analytique vs systémique? Voir 06.12.23
+
+<!-- Comment ça se voit dans les traces, quels indicateurs (observables, calculs, représentations).  -->
+<!-- vision linéaire vont prendre en compte que d’un sens (ex. que Santé, que bienêtre, que population…), ALORS que l’objectif pédago est que les élèves doivent être capables de prendre en compte multiple variables (Task switching) … LIEN AVEC EF (Diamond, 2013): WM/INHIB/SWITCHING -->
+
+Our indicators cannot measure learning per se, however they measure the way learners may tackle complexity (which was the pedagogical objective).
+
+## H2: Visualization
+
+How to visualize these game indicators to allow researchers to determine the players' analytic or systemic approach to complexity?
+
+### 3D graph (X(health)Y(wellbeing)Z(netfood) on TIME) OR Triangle on time
 
 How does the outcomes of health, wellbeing, netfood are evolving through time ? 
 
@@ -352,17 +526,20 @@ Quantifier combien d'élèves, on a donné un jeu complexe et il y a tant d'él�
 
 Keeping the focus on one variable may result to not grasping food system complexity.
 
-## Post-feedback action
+### Post-feedback action
 
 L’action après un feedback n’allant pas dans le sens du résultat escompté ? (indicateur)
 
 « Qu'est-ce qui se passe quand ont fait une erreur, quand un résultat à l'encontre, des joueurs qui quelques uns rviennent en arrière, anuler et revenir et essayer une solution. Typique d'un joueur qui tacle complexité. » 
 
 
-## Visual Network Analysis
+### Visual Network Analysis
+
+// bof ...
+
 Nodes are representing each game parameter (e.g., ) and vertices are representing the weight. The way the network expands is thought to be an indicator of the player skill to grasp the system complexity.
 
-## Game state Network as a function of time
+### Game state Network as a function of time
 
 Idées préconcues, on va pas mettre pétrole et épuisent gens et s'apperçoivent qu'impasse et produisent pas assez. Dans ces cas là, voir bulle pétrole qui s'allume et mobilisé. 
 
@@ -372,7 +549,9 @@ Evoquait la question du réseau : noeuds éléments agis, complexifie au cours d
 
 2 types : une à priori sur les règles de jeu. Fichier excel : dépendances, modèle initial, simulateur. Pour faire ce réseau, à priori le faire avec les éléments tels qu'ils existent dans le jeu : réseau du game ET réseau du play ce qu'il font. Un modèle attendu du jeu (excel) et jusqu'où partent dans le jeu (play) : quels pourcentage d'éléments, visualisation signifiante, si joueur très expérimenté. Même nicolas de jouer en tant que trace experte. Solution non-correcte mais le niveau de complexité, le maximum car connait tous les éléments et mesurer une distance.
 
-## Predicted model vs. Expert model vs. Player model
+### Predicted model vs. Expert model vs. Player model
+
+//bof 
 
 Modèle prédit : https://docs.google.com/spreadsheets/d/1njM6T-eD5umXyN-mU__Hetqg3rfiY6GW/edit#gid=557273296
 
@@ -391,11 +570,6 @@ The findings of this Masters' thesis clearly show that ...
 
 <!-- Evaluation: analyze, offer explanations, reference the literature, state implications -->
 One explanation for ...
-
-## Complexity
-Ladyman et al. (2013)
-Maybe link with Diamond, 2013
-Morin (1999), preface du directeur général de l'UNESCO : "L'un des défis les plus difficiles à relever sera de modifier nos modes de pensée de façon à faire face à la complexité grandissante, à la rapidité des changements et à l’imprévisible, qui caractérisent notre monde." (p.7)
 
 ## Analysis of the game in terms of complexity
 One of AL2049 aim is to know how players explore “complexity” in the game. By complexity,
@@ -420,6 +594,11 @@ Jeu play 2: On reste sur l’interaction joueur·euse – apprenant·e
 What would the results modify concretely? see @banihashem_etal_2018 's benefits and tick what benefits our method is offering. 
 
 Following @banihashem_etal_2018...
+
+Quelles sont les évolutions souhaitées et possible autour de : 
+l’orchestration du jeu, le rôle du mdj ou de l’animation dans le musée 
+des modifications significatives du gameplay, de l’apparence du jeu, ou autre 
+des méthodes de collectes et de traitement des données autour des PLAY Analyitcs 
 
 ### For learners
 
@@ -446,3 +625,77 @@ We have looked at the food system complexity (real life situation) through an ep
 # Appendix
 
 This will be Appendix A.
+
+# Lol
+
+From One to Many Play Strategies. Analyzing Trace Data from AL2049, an Educational Video Game about Food Production Complexity.
+Author : Kenneth Rioja
+Supervisors : Eric Sanchez (TECFA, UNIGE), Simon Morard (TECFA, UNIGE)
+Development Master
+Introduction
+
+Educational Video Games (EdVG) are fascinating yet challenging creations. Their guiding principle is to translate an educational goal into a unique and engaging play experience . However, this play experience must have a certain degree of learning outcome, if not its educational benefit can be close to zero. Using generic and domain-specific models (for an overview, see Wiemeyer et al., 2016) as well as practice-based experiences (e.g., design-based research, Sloane, 2017; Squire, 2005), EdVG designers are told to create a learning situation leading to learning outcomes. Furthermore, these situations hold pivotal positions in the gameplay. In that respect, prior learning hypotheses must be tested. Data collection and data analysis are a way to provide observable indicators on players' actions at play. One may say “If you cannot measure it, you cannot improve it”.
+
+AL2049, an EdVG about food production, follows the later statements. It has been played by thousands of pupils’ groups in a museum and digital traces have been collected from their play session. Its development originates from research-based design, that is, researchers, the curator of the Alimentarium museum and game developers worked hand in hand to create AL2049. One of its educational purposes is to “understand the complex relationships between food production system components” (Oliveira et al., 2022). 
+
+The game seeks to change players’ relationship to knowledge about food production complexity by playing a non-deterministic game. Players advance through the game without the correct answer, and this type of problem is called ill-structured problem (Jonassen, 2000). The goal of this Masters thesis is to find what indicators can be linked to their comprehension of food production complexity and see whether their strategies are changing over time thanks to these indicators. It will thus be a way to bring to light their understanding of the complex relationships between food production system components.
+Litterature Review
+
+AL2049 is an EdVG aiming at making players aware of the food production complexity. Defining complexity is undoubtedly a complex task. The Cambridge Dictionary (2024) describes it as: “the state of having many parts and being difficult to understand or find an answer to”. In the literature, we can find the concept of complexity broke down into a list of seven properties: Nonlinear, Feedback, Spontaneous Order, Robustness, Emergence, Hierarchical Organization and Numerosity (Ladyman et al., 2013). Wikipedia (2024) adds an interesting variation: “Definitions of complexity often depend on the concept of a "system"”. AL2049 refers to the food production system and how complex it is. The game is thus a non-exhaustive model of it and, like science, reductionism (i.e., decomposing a system into multiple parts to trying to understand it) has been used to explain complexity. However, there are two types of system modelling: a first is called analytic modelling which isolates the atoms of an ensemble whereas systemic modelling binds elements of a same entity (Lugan, 2009). AL2049 sits in the second system modelling and on top of that offers the players to solve an ill-structured problem. For Jonassen (2000), it appears ill-structured because of: “ 1) its problem elements which are unknown or not known with any degree of confidence (Wood, 1983, cited by Jonassen, 2000); 2) its multiple solution, solution paths, or no solutions at all (Kitchner, 1983, cited by Jonassen, 2000); 3) the multiple criteria for evaluating solutions, so there is uncertainty about which concepts, rules, and principles are necessary for the solution and how they are organized; and 4) often requires learners to make judgments and express personal opinions or beliefs about the problem, so ill-structured problems are uniquely human interpersonal activities (Meacham & Emont, 1989, cited by Jonassen, 2000).”
+Analyses of play traces from an EdVG built on ill-structured problems is not a common domain. Indeed, AL2049, as an ill-structured problem, focuses more on “the decision, articulation and argumentation” and “dilemnas with no verifiably correct solution” (Jonassen, 2000). The expected learning outcome of AL2049 is called epistemic development. It is “the ability to grasp the complexity of a problem, to identify themselves as being able to elaborate solutions to this problem and to develop arguments that justifies the choices done” (free translation from Sanchez, 2022). Epistemic development is often analyzed through quantitative analyses (Cabellos & Pozo, 2023). Furthermore, in Learning Analytics, the “analysis and representation of data about learners in order to improve learning” (Clow, 2013), as well as Game / Gameplay / Play / Player analytics (for a recent comprehensive review and classification of game analytics, see Su et al., 2021), pletoras of analyses have been developped for specific games (Lankoski & Björk, 2015; Lang et al., 2022; Seif El-Nasr, 2013), but none have focused on epistemic development. 
+ 
+Research Question
+
+This development Masters thesis is therefore concerned with the problem of finding a methodology to set down indicators from a quantitative point of view supporting epistemic development.
+
+Our main research question is “How the game allow players to grasp the food system complexity stakes and how do they interact with them”
+
+Specific RQ1: What game indicators allow to detect a change in strategy ?
+
+Specific RQ2: How to visualize these game indicators to allow researchers to determine the players' analytic or systemic approach to complexity?
+
+Firstly, how are the indicators of complexity translated into the traces of the AL2049 game? (translation of the complexity of the food system into the game). Secondly, how do players' strategies change in the face of the complexity of the food production system? (people's ability to understand the complex relationships between the components of the food production system).
+Methods
+Tout d’abord, une analyse à priori des critères de complexité devra être faite avec l’équipe de recherche du jeu AL2049. En découlera une retranscription de ces critères sous forme de traces numérique observables et opérationnalisés et à chaque paire critères-traces une hypothèse associée. Parmi les 9 critères de la complexité, un choix sera fait sur 1 ou 2 critères pour l’analyse de données. Nous serons donc en capacité d’infirmer ou réfuter les hypothèses associées aux critères.
+
+ 
+References
+Complexity. (2024, January 17). https://dictionary.cambridge.org/dictionary/english/complexity
+Complexity. (2024, January 17). In Wikipedia. https://en.wikipedia.org/w/index.php?title=Complexity  
+1. Introduction et problématique (environ 1/2 page)
+
+Voici les questions auxquelles cette section  doit répondre:
+Ce à quoi on va s'intéresser, la question à étudier. -> traduction de l’objectif pédago dans jeu
+dans quel contexte cette question se pose-t-elle  ? -> AL2049
+Comment ce problème se manifeste-t-il ? - Qui est concerné ? -> avec données, quoi faire ? chercheurs AL
+Quelles sont les conséquences ? Pourquoi résoudre ce problème ? -> pour attester de la validité pédagogique de AL (OLIV)
+Pour les deux points précédents, appuyez vos propos sur des références académiques.
+Qu'a-t-on besoin de savoir ?
+Quelle est donc la problématique (question large) que vous allez traiter dans ce mémoire ?
+
+2. Revue de littérature - Etat actuel (environ une page)
+
+Qui dit quoi dans la littérature?  Que sait-on déjà ? Comment le sait-on ?
+Qui s'oppose à qui ? Dans les grandes lignes, les différentes positions sur la question, les questions ouvertes.
+Décrivez un modèle ou une recherche ou un système (mémoire de dev.) qui va inspirer votre propre recherche ? Expliquez le lien avec votre problématique et justifiez en quoi cette approche est intéressante pour votre mémoire.
+
+3. Questions de recherche (environ 1/2 page)
+
+En fonction de ce qui précède indiquez de une à trois questions de recherche précises.
+En fonction de votre avancée, vous pourrez citer plus ou moins d'auteurs ici.
+
+4. Méthodologie prévue (environ 1/2 page)
+
+Décrivez en quelques lignes la méthodologie que vous pensez employer pour votre mémoire :
+Population ou situation étudiée
+Méthode de recueil de données : indiquez le type de méthode selon les termes scientifiques et justifiez pourquoi cette méthode.
+Méthode d'analyse : comment allez-vous analyser vos données ? quelles sont vos variables, que servent-elles à mesurer comme phénomène ?
+
+Autoscopie (hors limite de mots, de 1/2 à une page)
+
+Bilan : combien d'écrits déjà lus ? combien trouvés et à lire ? quel logiciel de gestion biblio ? quels outils de développement / recueil / analyse de données ?
+Qu'est-ce que vous trouvez plaisant dans cette activité ?
+Qu'est-ce que vous trouvez difficile ou déplaisant ?
+Quelles sont les limites que vous identifiez à votre travail et comment pensez-vous les dépasser dans les trois prochains mois ?
+
+Références bibliographiques (hors limite de mots)
