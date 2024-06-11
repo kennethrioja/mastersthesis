@@ -6,32 +6,44 @@ date: "`r Sys.Date()`"
 output:
   word_document:
     reference_docx: assets/utils/doc_style_tmb.docx
-
-bibliography: "`r rbbt::bbt_write_bib('/Users/kenneth_personnel/Desktop/00_Personnel/01_UNIVERSITE/M_MALTT/memoire/mastersthesis/assets/utils/bibliography.bib', overwrite = TRUE)`"
+bibliography: "`r rbbt::bbt_write_bib('/Users/kenneth_personnel/Desktop/00_Personnel/01_UNIVERSITE/Cursus_M_MALTT/memoire/mastersthesis/assets/utils/bibliography.bib', overwrite = TRUE)`"
 csl: assets/utils/citation_style_apa7th.csl
 params:
   doc_subtitle: ""
 editor_options: 
   chunk_output_type: console
 ---
-
 <!-- Setup -->
 ```{r setup, include=FALSE}
-## clear workspace
+## Clear workspace
 rm(list=ls())
 
 ## Seed for random number generation
 set.seed(42)
 
 ## Load packages
+remotes::install_github("paleolimbot/rbbt")
+library(rbbt)
 # install.packages("pacman")
 library(pacman)
 pacman::p_load(
+  "rstudioapi",
+  "devtools",
+  "readxl",
   "openxlsx",
   "dplyr",
   "tidyr",
   "ggplot2",
-  "stringr" 
+  "stringr",
+  "purrr",
+  "papaja",
+  "gridExtra",
+  "forcats",
+  "beepr",
+  "reshape2",
+  "stats",
+  "cluster",
+  "factoextra"
   # insert packages' name here
 )
 
@@ -39,203 +51,10 @@ pacman::p_load(
 setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # this needs to be commented for 'render_script_mac.command' to work
 # getwd() # it must display at least at the end of the path
 
-## For TOC : https://community.rstudio.com/t/starting-toc-on-a-new-page-after-title-page-in-rmd-to-word-doc-output/36081/2
-devtools::source_gist("c83e078bf8c81b035e32c3fc0cf04ee8",
-                      filename = 'render_toc.R')
-
 ## Load environment or read .csv files
-dfr <- read.csv("assets/priv/ng/TBALL_EventVariable_start_until2023_07_18.csv", sep = ";")
-dft <- readxl::read_xlsx("assets/priv/ng/TBALL_EventVariable_start_until2023_07_18_TRIEES.xlsx")
+load("output/data/environment_mem_20240530.RData")
+beep(5)
 ```
-
-#<!-- Descriptive statistics -->
-```{r descriptive, include=FALSE, echo=TRUE, results='hide'}
-# global
-names(dft)
-str(dft)
-summary(dft)
-
-# table on type, verb, source, variable, typeName, value
-dft_list <- names(dft[,11:(length(names(dft))-1)])
-tableall <- function(df, list) {
-  n = 0
-  for (n in 1:length(list)) {
-    print("------------------------------------")
-    print(list[n])
-    print(table(df[list[n]]), useNa = "always")
-  }
-}
-tableall(dft, dft_list)
-```
-
-#<!-- GS -->
-```{r gamestates, include=FALSE, echo=TRUE, results='hide'}
-## translate game states
-
-# Mapping of numeric values to character values for the cards
-card_code <- c(
-  "1" = "chicken",
-  "2" = "cow",
-  "3" = "fish",
-  "4" = "insect",
-  "5" = "crops",
-  "6" = "leguminous",
-  "7" = "veggies",
-  "8" = "meat_transfo",
-  "9" = "vegetarian_transfo",
-  "10" = "resto",
-  "11" = "market",
-  "12" = "lab",
-  "13" = "hunting"
-)
-
-dfs <- dft %>%
-  
-  ## to keep only the GS lines
-  # dplyr::filter(variable == 'GameState') %>%
-  
-  ## split GS by # creating s for state, p for placement, n for news
-  dplyr::mutate(
-    s = dplyr::if_else(variable == 'GameState', stringr::str_split(value, '#', simplify = TRUE)[, 1], NA_character_),
-    p = dplyr::if_else(variable == 'GameState', stringr::str_split(value, '#', simplify = TRUE)[, 2], NA_character_),
-    n = dplyr::if_else(variable == 'GameState', stringr::str_split(value, '#', simplify = TRUE)[, 3], NA_character_)
-  ) %>%
-  
-  ## split p by rooms
-  tidyr::separate(p, into = c("p_r1", "p_r2", "p_r3", "p_r4", "p_r5", "p_r6", "p_r8", "p_ext", "null"), sep = ";", fill = "right") %>%
-  select(-starts_with("null")) %>% # this is the last split string which corresponds to nothing
-  
-  ## split each room by card and energy(human*green*fossil)
-  dplyr::mutate(
-    
-    ## room 1
-    p_r1_card = dplyr::if_else(!grepl("!", p_r1), p_r1, stringr::str_split(p_r1, "!", simplify = TRUE)[, 1]),
-    p_r1_energy = dplyr::if_else(!grepl("!", p_r1), p_r1, stringr::str_split(p_r1, "!", simplify = TRUE)[, 2]),
-    p_r1_option = dplyr::if_else(!grepl("!", p_r1), p_r1, stringr::str_split(p_r1, "!", simplify = TRUE)[, 3]),
-    p_r1_human = dplyr::if_else(!grepl("\\*", p_r1_energy), p_r1_energy, stringr::str_split(p_r1_energy, "\\*", simplify = TRUE)[, 1]),
-    p_r1_green = dplyr::if_else(!grepl("\\*", p_r1_energy), p_r1_energy, stringr::str_split(p_r1_energy, "\\*", simplify = TRUE)[, 2]),
-    p_r1_fossil = dplyr::if_else(!grepl("\\*", p_r1_energy), p_r1_energy, stringr::str_split(p_r1_energy, "\\*", simplify = TRUE)[, 3]),
-    p_r1 = NULL,
-    p_r1_energy = NULL,
-    
-    ## room 2
-    p_r2_card = dplyr::if_else(!grepl("!", p_r2), p_r2, stringr::str_split(p_r2, "!", simplify = TRUE)[, 1]),
-    p_r2_energy = dplyr::if_else(!grepl("!", p_r2), p_r2, stringr::str_split(p_r2, "!", simplify = TRUE)[, 2]),
-    p_r2_option = dplyr::if_else(!grepl("!", p_r2), p_r2, stringr::str_split(p_r2, "!", simplify = TRUE)[, 3]),
-    p_r2_human = dplyr::if_else(!grepl("\\*", p_r2_energy), p_r2_energy, stringr::str_split(p_r2_energy, "\\*", simplify = TRUE)[, 1]),
-    p_r2_green = dplyr::if_else(!grepl("\\*", p_r2_energy), p_r2_energy, stringr::str_split(p_r2_energy, "\\*", simplify = TRUE)[, 2]),
-    p_r2_fossil = dplyr::if_else(!grepl("\\*", p_r2_energy), p_r2_energy, stringr::str_split(p_r2_energy, "\\*", simplify = TRUE)[, 3]),
-    p_r2 = NULL,
-    p_r2_energy = NULL,
-    
-    ## room 3
-    p_r3_card = dplyr::if_else(!grepl("!", p_r3), p_r3, stringr::str_split(p_r3, "!", simplify = TRUE)[, 1]),
-    p_r3_energy = dplyr::if_else(!grepl("!", p_r3), p_r3, stringr::str_split(p_r3, "!", simplify = TRUE)[, 2]),
-    p_r3_option = dplyr::if_else(!grepl("!", p_r3), p_r3, stringr::str_split(p_r3, "!", simplify = TRUE)[, 3]),
-    p_r3_human = dplyr::if_else(!grepl("\\*", p_r3_energy), p_r3_energy, stringr::str_split(p_r3_energy, "\\*", simplify = TRUE)[, 1]),
-    p_r3_green = dplyr::if_else(!grepl("\\*", p_r3_energy), p_r3_energy, stringr::str_split(p_r3_energy, "\\*", simplify = TRUE)[, 2]),
-    p_r3_fossil = dplyr::if_else(!grepl("\\*", p_r3_energy), p_r3_energy, stringr::str_split(p_r3_energy, "\\*", simplify = TRUE)[, 3]),
-    p_r3 = NULL,
-    p_r3_energy = NULL,
-    
-    ## room 4
-    p_r4_card = dplyr::if_else(!grepl("!", p_r4), p_r4, stringr::str_split(p_r4, "!", simplify = TRUE)[, 1]),
-    p_r4_energy = dplyr::if_else(!grepl("!", p_r4), p_r4, stringr::str_split(p_r4, "!", simplify = TRUE)[, 2]),
-    p_r4_option = dplyr::if_else(!grepl("!", p_r4), p_r4, stringr::str_split(p_r4, "!", simplify = TRUE)[, 3]),
-    p_r4_human = dplyr::if_else(!grepl("\\*", p_r4_energy), p_r4_energy, stringr::str_split(p_r4_energy, "\\*", simplify = TRUE)[, 1]),
-    p_r4_green = dplyr::if_else(!grepl("\\*", p_r4_energy), p_r4_energy, stringr::str_split(p_r4_energy, "\\*", simplify = TRUE)[, 2]),
-    p_r4_fossil = dplyr::if_else(!grepl("\\*", p_r4_energy), p_r4_energy, stringr::str_split(p_r4_energy, "\\*", simplify = TRUE)[, 3]),
-    p_r4 = NULL,
-    p_r4_energy = NULL,
-    
-    ## room 5
-    p_r5_card = dplyr::if_else(!grepl("!", p_r5), p_r5, stringr::str_split(p_r5, "!", simplify = TRUE)[, 1]),
-    p_r5_energy = dplyr::if_else(!grepl("!", p_r5), p_r5, stringr::str_split(p_r5, "!", simplify = TRUE)[, 2]),
-    # p_r5_option = dplyr::if_else(!grepl("!", p_r5), p_r5, stringr::str_split(p_r5, "!", simplify = TRUE)[, 3]), # no options
-    p_r5_human = dplyr::if_else(!grepl("\\*", p_r5_energy), p_r5_energy, stringr::str_split(p_r5_energy, "\\*", simplify = TRUE)[, 1]),
-    p_r5_green = dplyr::if_else(!grepl("\\*", p_r5_energy), p_r5_energy, stringr::str_split(p_r5_energy, "\\*", simplify = TRUE)[, 2]),
-    p_r5_fossil = dplyr::if_else(!grepl("\\*", p_r5_energy), p_r5_energy, stringr::str_split(p_r5_energy, "\\*", simplify = TRUE)[, 3]),
-    p_r5 = NULL,
-    p_r5_energy = NULL,
-    
-    ## room 6
-    p_r6_card = dplyr::if_else(!grepl("!", p_r6), p_r6, stringr::str_split(p_r6, "!", simplify = TRUE)[, 1]),
-    p_r6_energy = dplyr::if_else(!grepl("!", p_r6), p_r6, stringr::str_split(p_r6, "!", simplify = TRUE)[, 2]),    
-    # p_r6_option = dplyr::if_else(!grepl("!", p_r6), p_r6, stringr::str_split(p_r6, "!", simplify = TRUE)[, 3]),
-    p_r6_human = dplyr::if_else(!grepl("\\*", p_r6_energy), p_r6_energy, stringr::str_split(p_r6_energy, "\\*", simplify = TRUE)[, 1]),
-    p_r6_green = dplyr::if_else(!grepl("\\*", p_r6_energy), p_r6_energy, stringr::str_split(p_r6_energy, "\\*", simplify = TRUE)[, 2]),
-    p_r6_fossil = dplyr::if_else(!grepl("\\*", p_r6_energy), p_r6_energy, stringr::str_split(p_r6_energy, "\\*", simplify = TRUE)[, 3]),
-    p_r6 = NULL,
-    p_r6_energy = NULL,
-    
-    ## room 8
-    p_r8_card = dplyr::if_else(!grepl("!", p_r8), p_r8, stringr::str_split(p_r8, "!", simplify = TRUE)[, 1]),
-    p_r8_energy = dplyr::if_else(!grepl("!", p_r8), p_r8, stringr::str_split(p_r8, "!", simplify = TRUE)[, 2]),
-    # p_r8_option = dplyr::if_else(!grepl("!", p_r8), p_r8, stringr::str_split(p_r8, "!", simplify = TRUE)[, 3]),
-    p_r8_human = dplyr::if_else(!grepl("\\*", p_r8_energy), p_r8_energy, stringr::str_split(p_r8_energy, "\\*", simplify = TRUE)[, 1]),
-    p_r8_green = dplyr::if_else(!grepl("\\*", p_r8_energy), p_r8_energy, stringr::str_split(p_r8_energy, "\\*", simplify = TRUE)[, 2]),
-    p_r8_fossil = dplyr::if_else(!grepl("\\*", p_r8_energy), p_r8_energy, stringr::str_split(p_r8_energy, "\\*", simplify = TRUE)[, 3]),
-    p_r8 = NULL,
-    p_r8_energy = NULL,
-    
-    ## ext
-    p_ext_card = dplyr::if_else(!grepl("!", p_ext), p_ext, stringr::str_split(p_ext, "!", simplify = TRUE)[, 1]),
-    p_ext_energy = dplyr::if_else(!grepl("!", p_ext), p_ext, stringr::str_split(p_ext, "!", simplify = TRUE)[, 2]),
-    # p_ext_option = dplyr::if_else(!grepl("!", p_ext), p_ext, stringr::str_split(p_ext, "!", simplify = TRUE)[, 3]),
-    p_ext_human = dplyr::if_else(!grepl("\\*", p_ext_energy), p_ext_energy, stringr::str_split(p_ext_energy, "\\*", simplify = TRUE)[, 1]),
-    p_ext_green = dplyr::if_else(!grepl("\\*", p_ext_energy), p_ext_energy, stringr::str_split(p_ext_energy, "\\*", simplify = TRUE)[, 2]),
-    p_ext_fossil = dplyr::if_else(!grepl("\\*", p_ext_energy), p_ext_energy, stringr::str_split(p_ext_energy, "\\*", simplify = TRUE)[, 3]),
-    p_ext = NULL,
-    p_ext_energy = NULL,
-  ) %>% 
-  
-  ## separate the news
-  tidyr::separate(n, into = c("n_opened", "n_appeared"), sep = "\\*", fill = "right") %>% 
-
-  ## change values of card columns to code
-  dplyr::mutate_at(dplyr::vars(ends_with("_card")), ~dplyr::recode(., !!!card_code))
-
-# dir.create("./output/data", showWarnings = T)
-# write.csv(df, "./output/data/TBALL_EventVariable_start_until2023_07_18_TRIEES_GAMESTATES.csv")
-```
-
-#<!-- GV -->
-```{r gamevars, include=FALSE, echo=TRUE, results='hide'}
-
-variable_list <- c( 
-    "FoodProduction",
-    "FoodLoss",
-    "Pollution",
-    "Co2Emission",
-    "Pleasure",
-    "WorkAmount",
-    "FoodDiversity",
-    "Health",
-    "WellBeing",
-    "EnergyHuman",
-    "EnergyGreen",
-    "EnergyFossil"
-)
-
-## convert the variable vector into columns
-dfv <- dfs %>%
-  
-  ## create the variable columns
-  `is.na<-`(variable_list) %>% 
-  
-  ## spread the values to the corresponding columns
-  tidyr::spread(key = variable, value = value) %>% 
-  dplyr::select(-`<NA>`) %>% 
-  
-  ## fill down all the values
-  tidyr::fill(c("FoodProduction", "FoodLoss", "Pollution", "Co2Emission", "Pleasure", "WorkAmount", "FoodDiversity", "Health", "WellBeing", "EnergyHuman", "EnergyGreen", "EnergyFossil")) %>%
-
-  ## filter out typeName == Single
-  filter(typeName == "String" | is.na(typeName))
-
-
-```
-
 
 <!-- page break -->
 ```{=openxml}
@@ -457,6 +276,23 @@ Comment les matcher avec des indicateurs, est-ce que ça évolue dans le temps, 
 critère de complexité → évolution dans le temps 
 Finalité : Affirmer / confirmer que AL2049 rend compte de la complexité du système alimentaire ?
 
+## Preprocessing 
+  
+### Cleaning
+The `session_ID` "79e90533-9391-403a-b575-e4ca0657749d" had two games which is shown by having the `verb` "Start" twice. The decision has been to split it in two distinct `session_ID` : "79e90533-9391-403a-b575-e4ca0657749d" and "79e90533-9391-403a-b575-e4ca0657749e".
+
+### Game states transcription
+A Game State is a string, e.g., `0#None;12!4*0*0;6!4*2*0!Soj;1!4*2*0;10!5*0*0;3!2*2*0;None;13!6*0*0;#[b14]*[b06,b03,b01,b13,b12,b10,b04]` containing values about different variables. Added variables are listed in file "Decodage des GameState.txt", section "Dictionnaire des données : GameState".
+
+### Long to wide format for the list of variables
+At each recording of the game state, the game wrote in the table the variables (see "Decodage des GameState.txt", section "Liste des variables") and their modified value. In order to keep the targeted format "tn = nth game action = nth line = all recorded variables at tn", these variables were added as columns and values were spread vertically in the table until the next change.
+
+### Convert data type
+Phase, human, green, fossil were converted from `char` to `num`. Time was converted as `POSIXct` to be able to compute `playTimeInSec`
+
+### Remove sessions
+The session "9a6a73fa-3808-4d7d-8f7b-ee7cc6a36403" has been removed due to having large playTimeInSec
+
 <!-- ******* -->
 <!-- RESULTS -->
 <!-- ******* -->
@@ -465,7 +301,309 @@ Finalité : Affirmer / confirmer que AL2049 rend compte de la complexité du sys
 <!--   - Indicateurs au niveau du jeu -->
 <!--   - Indicateurs au niveau du joueur (c'est quoi que d'apprendre à se dépatouiller avec les syst complexe) -->
 
+## K-means
+
+https://www.datanovia.com/en/lessons/k-means-clustering-in-r-algorith-and-practical-examples/ 
+
+
 # Results
+
+## Exploratory TimeSeries
+
+```{r timeSeries, include=FALSE, echo=TRUE, results='hide'}
+t <- df %>% 
+  # keep GameStates only
+  dplyr::filter(typeName == "String") %>% 
+  
+  # playTimeInSec as the time spent from the first change of Energy consumption
+  group_by(session_ID) %>% 
+  dplyr::filter(playTimeInSec >= first(playTimeInSec[EnergyFossil != 0 | EnergyGreen != 0 | EnergyHuman != 0])) %>%
+  dplyr::mutate(playTimeInSec = playTimeInSec - first(playTimeInSec),
+                playTimeInMin = playTimeInMin - first(playTimeInMin)) %>% 
+  ungroup() %>% 
+  dplyr::select(session_ID, playTimeInMin, phase, EnergyFossilProp, EnergyGreenProp, EnergyHumanProp) %>% 
+  tidyr::pivot_longer(., cols = c(EnergyFossilProp, EnergyGreenProp, EnergyHumanProp), names_to = "Energy", values_to = "n") %>% 
+  group_nest(session_ID) %>% 
+  mutate(plot = map(data, 
+                    ~ggplot(.x, aes(x = playTimeInMin, y = n, group = Energy, colour = Energy)) +
+                      geom_line() +
+                      ggplot2::annotate('rect',
+                                        xmin = dplyr::last(.x$playTimeInMin[.x$phase == "I"]),
+                                        xmax = dplyr::first(.x$playTimeInMin[.x$phase == "II"]),
+                                        ymin = -Inf, ymax=Inf,
+                                        color = "grey", alpha = 0.3) +
+                      ggplot2::annotate("text", 
+                                        x = dplyr::first(.x$playTimeInMin[.x$phase == "II"]) / 4, 
+                                        y = 1.05, size = 3, hjust = 0, colour = "black",
+                                        label = deparse(bquote("phase I, " ~ n[actions] == .(length(unique(.x$playTimeInMin[.x$phase == "I"]))))), parse=T) +
+                      ggplot2::annotate("text", 
+                                        x = dplyr::last(.x$playTimeInMin[.x$phase == "II"]) / 1.5,
+                                        y = 1.05, size = 3, hjust = 0, colour = "black",
+                                        label = deparse(bquote("phase II, " ~ n[actions] == .(length(unique(.x$playTimeInMin[.x$phase == "II"]))))), parse=T) +
+                      labs(subtitle = paste0("Max Play Time (in min) = ", dplyr::last(.x$playTimeInMin)), 
+                           x = "Play Time in minutes", y = "Proportion", colour = "Energy") +
+                      scale_color_manual(values = c(c_fossil, c_green, c_human), labels = c("Fossil", "Green", "Human")) +
+                      theme_apa()
+  ))
+
+tlist <- list()
+j <- 1
+for(i in 1:nrow(t)) {
+  if (i %% 2 == 1) {
+      tlist[[j]] <- list()
+      tlist[[j]][[1]] <- t$plot[[i]] + labs(title = paste0("ID: ", t$session_ID[i]), tag = as.character(i))
+  } else {
+    tlist[[j]][[2]] <- t$plot[[i]]+ labs(title = paste0("ID: ", t$session_ID[i]), tag = as.character(i))
+    j = j + 1
+  }
+}
+# find_tlist(8)
+# tlist
+
+# Save all plots in pdf, https://stackoverflow.com/questions/12234248/printing-multiple-ggplots-into-a-single-pdf-multiple-plots-per-page
+# name = gsub(" ","",paste("./output/plots/playtime_energy_n", nrow(t), "_AL2049_",gsub("-","",Sys.Date()),".pdf"))
+# pdf(file=name, onefile = TRUE)
+# for (i in seq(length(tlist))) {
+#   do.call("grid.arrange", tlist[[i]])
+# }
+# dev.off()
+
+## Mean playtime
+# meanplayTimeInSec <- dfe %>%
+#   group_by(session_ID) %>%
+#   summarise(maxplaytime = as.numeric(max(playTimeInSec))) %>%
+#   pull(maxplaytime) %>% 
+#   mean() %>% 
+#   round(digits = 2)
+
+rm(t, tlist, j, i)
+beep(5)
+```
+
+Pistes: 
+Categories:
+1. 1 I: Cor >0 in FGH I – II: Cor <0 in F and 0 in GH II 
+2. 1 I: H>0 – II: G>0
+3. 
+
+Apply clustering?
+Multiple x with different scales to show multiples things
+
+## Kmeans, nazero, correlations, 4
+
+```{r kmeansnazero, include=FALSE, echo=TRUE, results='hide'}
+## keep GameStates
+df_kmeans_corrnazero <-
+  df %>% 
+  dplyr::filter(typeName == "String") %>% 
+  dplyr::select(session_ID, playTimeInSec, phase, EnergyFossilProp, EnergyGreenProp, EnergyHumanProp) %>% 
+  group_by(session_ID, phase) %>%
+  summarize(corFossil=round(cor(playTimeInSec, EnergyFossilProp, method="spearman", use="complete.obs"),digits=3),
+            corGreen=round(cor(playTimeInSec, EnergyGreenProp, method="spearman", use="complete.obs"),digits=3),
+            corHuman=round(cor(playTimeInSec, EnergyHumanProp, method="spearman", use="complete.obs"),digits=3)) %>%
+  tidyr::pivot_wider(
+    names_from = c("phase"),
+    values_from = c("corFossil", "corGreen", "corHuman")
+  ) %>% 
+  dplyr::select(1,2,4,6,3,5,7)
+
+# select only num cols and remove na
+df_kmeans_corrnazero <- as.data.frame(df_kmeans_corrnazero)
+df_kmeans_corrnazero2 <- df_kmeans_corrnazero[,-1]
+rownames(df_kmeans_corrnazero2) = df_kmeans_corrnazero[,1]
+df_kmeans_corrnazero <- df_kmeans_corrnazero2
+df_kmeans_corrnazero[is.na(df_kmeans_corrnazero)] <- 0
+rm(df_kmeans_corrnazero2)
+
+# run kmeans
+kmeans_corrnazero_nclust <- fviz_nbclust(df_kmeans_corrnazero, kmeans, method = "gap_stat") 
+# res = 4
+
+kmres_kmeans_corrnazero <- kmeans(df_kmeans_corrnazero, 4, nstart = 25)
+
+# mean
+aggregate(df_kmeans_corrnazero, by=list(cluster=kmres_kmeans_corrnazero$cluster), mean)
+
+# Visualize
+viz_kmeans_corrnazero <- fviz_cluster(kmres_kmeans_corrnazero, data = df_kmeans_corrnazero, 
+             ellipse.type = "convex",
+             palette = "jco",
+             repel = TRUE,
+             ggtheme = theme_minimal())
+viz_kmeans_corrnazero
+
+tabl_kmeans_corrnazero <- "
+| Cluster | corFossil_I | corGreen_I | corHuman_I | corFossil_II | corGreen_II | corHuman_II |
+|:-------:|:-----------:|:----------:|:----------:|:------------:|:-----------:|:-----------:|
+| 1       | +           | +          | +          | -            | ~0          | ~0          |
+| 2       | +           | +          | +          | -            | +           | +           |
+| 3       | +           | +          | +          | -            | +           | -           |
+| 4       | ~0          | +          | +          | ~0           | ~0          | ~0          |
+"
+
+beep(5)
+```
+
+Spearman correlations were computed between play time and each of the three energies (fossil, green, human) in phase I and phase II, giving a total of six correlations per session. The underlying hypothesis was to see whether players were using the same or different play strategies during phase I and phase II. The aim of this analysis is more exploratory rather than confirmatory. It has been chosen to transform NA correlations as 0 since there was strictly no tendency of change in the energy shown. K-Means clustering (@macqueen_1967) was applied to the data set and showed an optimal number of four clusters.
+
+```{r plot_kmeans_res}
+plot(kmeans_corrnazero_nclust)
+aggregate(df_kmeans_corrnazero, by=list(cluster=kmres_kmeans_corrnazero$cluster), mean)
+cat(tabl_kmeans_corrnazero)
+```
+
+
+This should inform us in the way the player increase or decrease their use of energy during Phase I and Phase II. A cluster could be related to a game play strategy.
+
+We can see that in all four clusters, there is a constant increase usage of each resource in phase I, except for cluster 4 which has no change in fossil ressource usage. Generally, if the player has been given resources, it will use them.
+
+Cluster 1 (n = `r kmres_kmeans_corrnazero$size[1]`) shows a decrease in fossil energy consumption in phase II and stay relatively constant in their usage of green or human resources. We can label them as the "Strict fossil reducers".
+
+```{r plot_kmeans_c1}
+find_tlist(94)
+```
+
+Cluster 2 (n = `r kmres_kmeans_corrnazero$size[2]`) and 3 (n = `r kmres_kmeans_corrnazero$size[3]`) both have a decrease in fossil usage and an increase in green usage, however the first is reducing human usage and the later is slightly increasing it. We can label cluster 2 as "Green Capitalist" and cluster 3 as the "Green Philantropic".
+
+```{r plot_kmeans_c23}
+find_tlist(49)
+find_tlist(64)
+```
+
+Cluster 4 (n = `r kmres_kmeans_corrnazero$size[4]`) has, as said earlier, no change in fossil resource usage in phase I and we can see numerically low correlations for every type of resource in phase II. In short, they can be seen as the "Green Expert".
+
+```{r plot_kmeans_c4}
+find_tlist(34)
+```
+
+However, this method of analysis does not take into account the variation of strategies change during one phase. Here, through the computing of correlation (general tendency to increase or decrease) This is why we oriented toward an analysis of...
+
+SUPPL:
+
+```{r plot_kmeans_clust}
+viz_kmeans_corrnazero
+```
+
+## PAM, nazero, correlations, 4
+
+```{r pamnazero, include=FALSE, echo=TRUE, results='hide'}
+## keep GameStates
+df_pam_corrnaomit <-
+  df %>% 
+  dplyr::filter(typeName == "String") %>% 
+  dplyr::select(session_ID, playTimeInSec, phase, EnergyFossilProp, EnergyGreenProp, EnergyHumanProp) %>% 
+  # dplyr::filter(session_ID == "79e90533-9391-403a-b575-e4ca0657749d" |
+  #                 session_ID == "fd67dd6d-cfb1-4dd1-ace5-ba4954808aae" |
+  #                 session_ID == "c00ca6cb-e547-473e-ba35-299069ab0c84" |
+  #                 session_ID == "d6c20613-ae2c-4e24-8758-ef45ca34770c") %>%
+
+  group_by(session_ID, phase) %>%
+  summarize(corFossil=round(cor(playTimeInSec, EnergyFossilProp, method="spearman", use="complete.obs"),digits=3),
+            corGreen=round(cor(playTimeInSec, EnergyGreenProp, method="spearman", use="complete.obs"),digits=3),
+            corHuman=round(cor(playTimeInSec, EnergyHumanProp, method="spearman", use="complete.obs"),digits=3)) %>%
+  tidyr::pivot_wider(
+    names_from = c("phase"),
+    values_from = c("corFossil", "corGreen", "corHuman")
+  ) %>% 
+  dplyr::select(1,2,4,6,3,5,7)
+
+# select only num cols and remove na
+df_pam_corrnaomit <- as.data.frame(df_pam_corrnaomit)
+df_pam_corrnaomit2 <- df_pam_corrnaomit[,-1]
+rownames(df_pam_corrnaomit2) = df_pam_corrnaomit[,1]
+df_pam_corrnaomit <- df_pam_corrnaomit2
+df_pam_corrnaomit <- df_pam_corrnaomit %>% na.omit()
+rm(df_pam_corrnaomit2)
+
+# cluster checks : https://www.datanovia.com/en/blog/clustering-example-4-steps-you-should-know/
+# cluster tendency
+clust_res_pam_corrnaomit <- get_clust_tendency(df_pam_corrnaomit, 40, graph = TRUE)
+# Hopskin statistic (if <0.5, contains meaningful clusters, https://www.datanovia.com/en/lessons/assessing-clustering-tendency/)
+clust_res_pam_corrnaomit$hopkins_stat
+# if we see structure, it shows that there is a structure
+print(clust_res_pam_corrnaomit$plot)
+
+# Compute the gap statistic
+fviz_nbclust(df_pam_corrnaomit, cluster::pam, method = "gap_stat") 
+# res = 4
+
+res_pam_corrnazero <- pam(df_pam_corrnaomit, 4)
+res_pam_corrnazero$medoids
+## dd <- cbind(USArrests, cluster = pam.res$cluster)
+
+# Cluster validation statistics: Inspect cluster silhouette plot
+sil_pam_corrnaomit <- silhouette(res_pam_corrnazero$clustering, dist(df_pam_corrnaomit))
+# Recall that the silhouette measures (Si) how similar an object i is to the the other objects in its own cluster versus those in the neighbor cluster. Si values range from 1 to - 1: A value of Si close to 1 indicates that the object is well clustered. In the other words, the object is similar to the other objects in its group. A value of Si close to -1 indicates that the object is poorly clustered, and that assignment to some other cluster would probably improve the overall results.
+fviz_silhouette(sil_pam_corrnaomit)
+
+tabl_pam_corrnaomit <- "
+| Medroids | corFossil_I | corGreen_I | corHuman_I | corFossil_II | corGreen_II | corHuman_II |
+|:--------:|:-----------:|:----------:|:----------:|:------------:|:-----------:|:-----------:|
+| 1        | +           | +          | +          | -            | ~0          | ~0          |
+| 2        | +           | +          | +          | -            | +           | +           |
+| 3        | +           | +          | +          | -            | +           | ~0          |
+| 4        | ~0          | +          | +          | ~0           | ~0          | ~0          |
+"
+
+# Visualize
+viz_pam_corrnaomit <- fviz_cluster(res_pam_corrnazero, data = df_pam_corrnaomit, 
+             ellipse.type = "convex",
+             palette = "jco",
+             repel = TRUE,
+             ggtheme = theme_minimal())
+viz_pam_corrnaomit
+
+beep(5)
+```
+
+The aim of this analysis is more exploratory rather than confirmatory. The underlying hypotheses were 1) to see whether players are using the same or different play strategies during phase I versus phase II and 2) to see if players could be categorized regarding their strategy throughout the game. Spearman correlations were computed between play time and each of the three energies (fossil, green, human) in phase I and phase II, giving a total of six correlations per session. NA correlations were omitted leading to a data set of `r nrow(df_pam_corrnaomit)` sessions. PAM algorithm (Partitioning Around Medoids, Kaufman & Rousseeuw, 1990) was applied to the data set instead of a k-means clustering because it is less sensitive to noise and outliers since it uses medroids (a representative example of the members of a cluster) instead of means (Kassambara, 2024).
+
+Find below the medroids
+
+```{r plot_pam_res}
+res_pam_corrnazero$medoids
+cat(tabl_pam_corrnaomit)
+```
+
+This should inform us with the way players increase or decrease their use of energy during Phase I and Phase II. A cluster can be related to a game play strategy.
+
+We can see that in all four clusters, there is a constant increase usage of each resource in phase I, except for cluster 4 which has no change in fossil ressource usage. Generally, if the player has been given resources, it will use them.
+
+Cluster 1 (n = `r res_pam_corrnazero$id.med[1]`) shows a decrease in fossil energy consumption in phase II and stay relatively constant in their usage of green or human resources. We can label them as the "Strict fossil reducers".
+
+```{r plot_pam_c1}
+find_tlist(27)
+```
+
+Cluster 2 (n = `r res_pam_corrnazero$id.med[2]`) and 3 (n = `r res_pam_corrnazero$id.med[3]`) both have a decrease in fossil usage and an increase in green usage, however the first is reducing human usage and the later is slightly increasing it. We can label cluster 2 as "Green Capitalist" and cluster 3 as the "Green Philantropic".
+
+```{r plot_pam_c23}
+find_tlist(112)
+find_tlist(90)
+```
+
+Cluster 4 (n = `r res_pam_corrnazero$id.med[4]`) has, as said earlier, no change in fossil resource usage in phase I and we can see numerically low correlations for every type of resource in phase II. In short, they can be seen as the "Green Expert".
+
+```{r plot_pam_c4}
+find_tlist(108)
+```
+
+However, this method of analysis does not take into account the variation of strategies change during one phase. Here, through the computing of correlation (general tendency to increase or decrease) This is why we oriented toward an analysis of...
+
+SUPPL:
+
+```{r plot_pam_clust}
+print(clust_res_pam_corrnaomit$plot)
+```
+
+Hopkin's stat = `r clust_res_pam_corrnaomit$hopkins_stat`
+
+## Timeseries clust
+```{r timeseries_clust}
+# normalise à t=0 == premier mouvement
+# bouge l'analyse de donnée prélimiaire dans un autre R
+
+```
 
 ## H1: Indicators
 
